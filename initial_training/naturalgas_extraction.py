@@ -4,6 +4,7 @@ import os
 import requests
 import boto3
 from dotenv import load_dotenv
+from typing import Generator
 
 # Import environment variables
 load_dotenv()
@@ -27,7 +28,7 @@ class S3:
     
     # Extract data from specified object
     @classmethod
-    def retrieve(cls, folder: str, object_key: str) -> dict:
+    def retrieve(cls, folder: str, object_key: str) -> Generator(dict):
         cls.connect()
         object = cls.s3_client.get_object(Bucket=cls.bucket, Key=folder + object_key)
         contents = object['Body'].read().decode('utf-8')
@@ -42,7 +43,7 @@ class S3:
         cls.s3_client.put_object(Bucket=cls.bucket, Key=folder + object_key, Body=data_json, ContentType='application/json')
         cls.disconnect()
 
-# EIA class for extracting data from api
+# Class for extracting data from Energy Information Administration API
 class EIA:
     # Define class variables
     api_key = os.environ.get('API_KEY')
@@ -56,14 +57,33 @@ class EIA:
         response = requests.get(url, params=parameters)
         return response
     
-    # Make API calls until all data has been extracted (API by defualt only returns 5000 rows)
+    # Make API calls until all data has been extracted (API by default only returns 5000 rows)
     @classmethod
-    def extract_all(cls, endpoint: str, parameters: dict, offset=0):
+    def extract(cls, endpoint: str, parameters: dict, folder, object_key, offset=0) -> None:
         data = []
         while True:
             response = cls.api_request(endpoint=endpoint, parameters=parameters, offset=offset)
             if response.status_code == 200:
-                response_json = response.json()
+                results = response.json()
+                if not results:
+                    break
+                data.extend(results)
+                offset += 5000
+            else:
+                raise Exception(f'{response.status_code} : {response.text}')
+        S3.store(data=data, folder=folder, object_key=object_key)
+
+# Class for extracting weather data from selected locations from Open-meteo.com
+class OpenMeteo:
+
+
+
+
+    
+
+        
+            
+
 
 
     
