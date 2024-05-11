@@ -8,6 +8,7 @@ exceptiongroup==1.2.1
 flatbuffers==24.3.25
 idna==3.7
 jmespath==1.0.1
+numpy==1.26.4
 openmeteo_requests==1.2.0
 openmeteo_sdk==1.11.4
 platformdirs==4.2.1
