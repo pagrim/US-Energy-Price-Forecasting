@@ -1,12 +1,10 @@
 ''' Import modules '''
 import json
 import os
+from datetime import datetime, timedelta
 import requests
 import boto3
-import requests_cache
-import openmeteo_requests
 from dotenv import load_dotenv
-from retry_requests import retry
 
 # Import environment variables
 load_dotenv()
@@ -69,7 +67,8 @@ class S3:
         cls.connect()
         object = cls.s3_client.get_object(Bucket=cls.bucket, Key=folder + object_key)
         contents = object['Body'].read().decode('utf-8')
-        yield json.loads(contents)
+        json_data = json.loads(contents)
+        yield json_data
         cls.disconnect()
 
     @classmethod
@@ -164,14 +163,15 @@ class EIA:
                 break
         S3.put_data(data=data, folder=folder, object_key=object_key)
 
-class OpenMeteo:
+class NOAA:
     ''' 
-    Class for extracing historical hourly weather data from selected locations from open-meteo.com
+    Class for extracing historical hourly weather data from selected locations from 
+    National Oceanic and Atmospheric Administration (NOAA)
 
     Locations weather data was extracted from:
     Los Angeles, San Diego, San Jose, San Francisco, Sacramento, Miami,
     Tampa, Orlando, Jacksonville, Chicago, St Louis, New Orleans, Baton Rouge,
-    Shreveport, Detroit, Ann Arbor, Grand Rapids, New York, Buffalo, Cleveland,
+    Shreveport, Detroit, Grand Rapids, New York, Buffalo, Cleveland,
     Columbus, Cincinnati, Philadelphia, Pittsburgh, Houston, Dallas, San Antonio,
     Austin
 
@@ -181,63 +181,64 @@ class OpenMeteo:
 
     Class Variables
     ---------------
-    cache_session (CachedSession): Caches session
-    retry_session (CachedSession): Retries cache session is unsuccessful
-    openmeteo (Client): Initialises a client session for open-meteo
+    token (str): Token to be used for API requests
     url (str): Url to be used to extract historical weather data
-    latitude (list): Latitude coordinate for specific location
-    longitude (list): Longitude coordinate for specific location
-    locations (list): List of lists consisting of city name and state name corresponding to order of latitude and longitude values
+    locations (dict): Dictionary consisting of stationid : [city, state] key + values
 
     Methods
     -------
     api_request(parameters):
-        Makes an API request to retrieve historical weather data from open-meteo API
+        Makes an API request to retrieve historical weather data from NOAA API
     extract(parameters, folder, object_key):
         Extract data from request and puts results in an S3 endpoint
 
     '''
-    cache_session = requests_cache.CachedSession('.cache', expire_after=3600)
-    retry_session = retry(cache_session, retries=5, backoff_factor=0.2)
-    openmeteo = openmeteo_requests.Client(session=retry_session)
-    url = 'https://archive-api.open-meteo.com/v1/archive'
-    latitude = [34.0522, 32.7157, 37.3394, 37.7749, 38.5816, 25.7743, 27.9475, 28.5383, 
-                30.3322, 41.85, 38.6273, 29.9547, 30.4433, 32.5251, 42.3314, 42.2776,
-                42.9634, 40.7143, 42.8865, 41.4995, 39.9612, 39.1271, 39.9523,
-                40.4406, 29.7633, 32.7831, 29.4241, 30.2672
-                ]
-    longitude = [-118.2437, -117.1647, -121.895, -122.4194, -121.4944, -80.1937, -82.4584, -81.3792, 
-                 -81.6556, -87.65, -90.1979, -90.0751, -91.1875, -93.7502, -83.0457, 83.7409,
-                 -85.6681, -74.006, -78.8784, -81.6954, -82.9988, -84.5144, -75.1638,
-                 -79.9959, -95.3633, -96.8067, -98.4936, -97.7431
-                 ]
-    locations = [['Los Angeles', 'California'], ['San Diego', 'California'], ['San Jose', 'California'], ['San Francisco', 'California'], 
-                 ['Sacramento', 'California'], ['Miami', 'Florida'], ['Tampa', 'Florida'], ['Orlando', 'Florida'], ['Jacksonville', 'Florida'],
-                 ['Chicago', 'Illinois'], ['St Louis', 'Illinois'], ['New Orleans', 'Louisiana'], ['Baton Rouge', 'Louisiana'], 
-                 ['Shreveport', 'Louisiana'], ['Detroit', 'Michigan'], ['Grand Rapids', 'Michigan'], ['New York', 'New York'],
-                 ['Buffalo', 'New York'], ['Cleveland', 'Ohio'], ['Columbus', 'Ohio'], ['Cincinnati', 'Ohio'],
-                 ['Philadelphia', 'Pennsylvania'], ['Pittsburgh', 'Pennsylvania'], ['Houston', 'Texas'], ['Dallas', 'Texas'], 
-                 ['San Antonio', 'Texas'], ['Austin', 'Texas']]
+    token = os.environ.get('TOKEN')
+    url = 'https://www.ncei.noaa.gov/cdo-web/api/v2/data'
+    locations = {'GHCND:USW00023174': ['Los Angeles', 'California'], 'GHCND:USW00023188': ['San Diego', 'California'], 
+                 'GHCND:USW00023244': ['San Jose', 'California'], 'GHCND:USW00023234': ['San Francisco', 'California'], 
+                 'GHCND:USW00023232': ['Sacramento', 'California'], 'GHCND:USW00012839':['Miami', 'Florida'], 
+                 'GHCND:USW00012842': ['Tampa', 'Florida'], 'GHCND:USW00012815':['Orlando', 'Florida'], 
+                 'GHCND:USW00013889': ['Jacksonville', 'Florida'], 'GHCND:USW00094846': ['Chicago', 'Illinois'], 
+                 'GHCND:USW00013994': ['St Louis', 'Illinois'], 'GHCND:USW00012916': ['New Orleans', 'Louisiana'], 
+                 'GHCND:USW00013970': ['Baton Rouge', 'Louisiana'], 'GHCND:USW00013957': ['Shreveport', 'Louisiana'], 
+                 'GHCND:USW00094847': ['Detroit', 'Michigan'], 'GHCND:USW00094860': ['Grand Rapids', 'Michigan'], 
+                 'GHCND:USW00014734': ['New York', 'New York'], 'GHCND:USW00014733': ['Buffalo', 'New York'], 
+                 'GHCND:USW00014820': ['Cleveland', 'Ohio'], 'GHCND:USW00014821': ['Columbus', 'Ohio'], 
+                 'GHCND:USW00093814': ['Cincinnati', 'Ohio'], 'GHCND:USW00013739': ['Philadelphia', 'Pennsylvania'], 
+                 'GHCND:USW00094823': ['Pittsburgh', 'Pennsylvania'], 'GHCND:USW00012960': ['Houston', 'Texas'], 
+                 'GHCND:USW00013960': ['Dallas', 'Texas'], 'GHCND:USW00012921': ['San Antonio', 'Texas'], 
+                 'GHCND:USW00013904': ['Austin', 'Texas']}
     
     @classmethod
     def api_request(cls, parameters: dict):
         ''' 
-        Makes an API request to retrieve historical weather data from open-meteo API
+        Makes an API request to retrieve historical weather data from NOAA API
 
         Args:
             parameters (dict): Parameters to be passed to the API request
 
         '''
-        try:
-            responses = cls.openmeteo.weather_api(cls.url, params = parameters)
-            return responses
-        except Exception as e:
-            return 'Error Occurred', e
+        while True:
+            try:
+                response = requests.get(url = cls.url, headers = {'token': cls.token},
+                                        params = parameters, timeout=7)
+                if response.status_code == 200:
+                    break
+            
+            except requests.exceptions.Timeout:
+                response = requests.get(url = cls.url, headers = {'token': cls.token},
+                                        params = parameters, timeout=7)
+                    
+            except requests.RequestException as e:
+                return 'Error occurred', e
+            
+        return response
     
     @classmethod
     def extract(cls, parameters: dict, folder: str, object_key: str):
         ''' 
-        Extract data from request and puts results in an S3 endpoint.
+        Extract data from requests and puts results in an S3 endpoint.
         
         Args:
             parameters (dict): Parameters to be passed to the API request
@@ -246,21 +247,32 @@ class OpenMeteo:
 
         '''
         data = []
-        count = 0
-        responses = cls.api_request(parameters = parameters)
-        for response in responses:
-            print(response)
-            dic = {}
-            dic['location']: cls.locations[count]
-            dic['temperature']: response.Hourly().Variables(0).ValuesAsNumpy()
-            dic['relative humidity']: response.Hourly().Variables(1).ValuesAsNumpy()
-            dic['precipitation']: response.Hourly().Variables(2).ValuesAsNumpy()
-            dic['rainfall']: response.Hourly().Variables(3).ValuesAsNumpy()
-            dic['snowfall']: response.Hourly().Variables(4).ValuesAsNumpy()
-            dic['wind_speed']: response.Hourly().Variables(5).ValuesAsNumpy()
-            data.append(dic)
-            count += 1
+        while True:
+            response = cls.api_request(parameters)
+            results = response.json()['results']
             
+            for record in results:
+                record['city'] = cls.locations.get(record['station'])[0]
+                record['state'] = cls.locations.get(record['station'])[1]
+            
+            data.extend(results)
+            
+            startdate = datetime.strptime(parameters['startdate'], '%Y-%m-%d')
+            enddate = datetime.strptime(parameters['enddate'], '%Y-%m-%d')
+            target = datetime.strptime('2024-04-26', '%Y-%m-%d')
+            increment = timedelta(days=6)
+
+            if enddate == datetime(2024, 4, 26):
+                break
+
+            elif enddate + increment > target:
+                parameters['startdate'] = max(enddate, target - increment).strftime('%Y-%m-%d')
+                parameters['enddate'] = target.strftime('%Y-%m-%d')
+            
+            else:
+                parameters['startdate'] = (startdate + increment).strftime('%Y-%m-%d')
+                parameters['enddate'] = (enddate + increment).strftime('%Y-%m-%d')
+
         S3.put_data(data=data, folder=folder, object_key=object_key)
 
 if __name__ == '__main__':
@@ -299,14 +311,21 @@ if __name__ == '__main__':
         }],
         'length': 5000
     }, folder='initial_training/', object_key='oil_spot_prices')
-    OpenMeteo.extract(parameters = {
-        "latitude": OpenMeteo.latitude,
-	    "longitude": OpenMeteo.longitude,
-	    "start_date": "1999-01-04",
-	    "end_date": "2024-04-26",
-	    "hourly": ["temperature_2m", "relative_humidity_2m", "precipitation", "rain", "snowfall", "wind_speed_10m"],
-	    "wind_speed_unit": "ms"
-    }, folder='initial_training/', object_key='daily_weather')
+    NOAA.extract(parameters = {'datasetid': 'GHCND',
+        'datatypeid': ['TMIN', 'TMAX','TAVG', 'SNOW', 'PRCP', 'AWND'],
+        'stationid': ['GHCND:USW00023174', 'GHCND:USW00023188', 'GHCND:USW00023244',
+            'GHCND:USW00023234', 'GHCND:USW00023232', 'GHCND:USW00012839',
+            'GHCND:USW00012842', 'GHCND:USW00012815', 'GHCND:USW00013889',
+            'GHCND:USW00094846', 'GHCND:USW00013994', 'GHCND:USW00012916',
+            'GHCND:USW00013970', 'GHCND:USW00013957', 'GHCND:USW00094847',
+            'GHCND:USW00094860', 'GHCND:USW00014734', 'GHCND:USW00014733',
+            'GHCND:USW00014820', 'GHCND:USW00014821', 'GHCND:USW00093814',
+            'GHCND:USW00013739', 'GHCND:USW00094823', 'GHCND:USW00012960',
+            'GHCND:USW00013960', 'GHCND:USW00012921', 'GHCND:USW00013904'],
+            'startdate': '1999-01-04',
+            'enddate': '1999-01-09',
+            'units': 'metric',
+            'limit': 1000}, folder='initial_training/', object_key='daily_weather')
 
 
     
