@@ -266,7 +266,7 @@ class NOAA:
                 break
 
             elif enddate + increment > target:
-                parameters['startdate'] = max(enddate, target - increment).strftime('%Y-%m-%d')
+                parameters['startdate'] = max(enddate + timedelta(days=1), target - increment).strftime('%Y-%m-%d') # 31/05/2024 original max(enddate, target-increment), adjusted to enddate + timedelta(days=1) due to duplicate records
                 parameters['enddate'] = target.strftime('%Y-%m-%d')
             
             else:
