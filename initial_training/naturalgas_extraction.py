@@ -129,7 +129,6 @@ class EIA:
             'X-Params': json.dumps(headers),
             'Content-Type': 'application/json'
         }
-        print(headers)
         try: 
             response = requests.get(url, headers=headers,  params=params, timeout=30)
             return response
@@ -314,10 +313,7 @@ if __name__ == '__main__':
             'N9103US3',
             'N9130US2',
             'N9130US3',
-            'N9132US2',
-            'N9132US3',
             'N9133US2',
-            'N9133US3'
             ]
         },
         'start': '1999-01',
