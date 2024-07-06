@@ -291,12 +291,62 @@ if __name__ == '__main__':
         }],
         'length': 5000
     }, folder='initial_training/', object_key='natural_gas_spot_prices')
+    EIA.extract(endpoint='natural-gas/sum/lsum/data/', headers = {
+        'api_key': os.environ.get('API_KEY'),
+        'frequency': 'monthly',
+        'data': ['value'],
+        'facets': {
+            'duoarea': [
+            'NUS',
+            'NUS-Z00'
+            ],
+         'series': [
+            'N3010US2',
+            'N3020US2',
+            'N5070US2',
+            'N5290US2',
+            'N9050US2',
+            'N9100US2',
+            'N9100US3',
+            'N9102US2',
+            'N9102US3',
+            'N9103US2',
+            'N9103US3',
+            'N9130US2',
+            'N9130US3',
+            'N9132US2',
+            'N9132US3',
+            'N9133US2',
+            'N9133US3'
+            ]
+        },
+        'start': '1999-01',
+        'end': '2024-04',
+        'sort': [{
+            'column': 'period',
+            'direction': 'asc'
+        }],
+        'length': 5000
+    }, folder='initial_training/', object_key='natural_gas_monthly_variables')
+    EIA.extract(endpoint='natural-gas/enr/drill/data/', headers = {
+        'api_key': os.environ.get('API_KEY'),
+        'frequency': 'monthly',
+        'data': ['value'],
+        'facets': {
+            'series': ['E_ERTRRG_XR0_NUS_C']
+            },
+        'start': '1999-01',
+        'end': '2024-03',
+        'sort': [{
+            'column': 'period',
+            'direction': 'asc'
+        }],
+        'length': 5000,
+    }, folder='initial_training/', object_key='natural_rigs_in_operation')
     EIA.extract(endpoint='petroleum/pri/spt/data/', headers = {
         'api_key': os.environ.get('API_KEY'),
         'frequency': 'daily',
-        'data': [
-            'value'
-        ],
+        'data': ['value'],
         'facets': {
             'series': [
                 'EER_EPD2F_PF4_Y35NY_DPG',
