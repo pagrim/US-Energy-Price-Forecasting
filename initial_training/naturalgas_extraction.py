@@ -339,7 +339,7 @@ if __name__ == '__main__':
             'direction': 'asc'
         }],
         'length': 5000,
-    }, folder='initial_training/', object_key='natural_rigs_in_operation')
+    }, folder='initial_training/', object_key='natural_gas_rigs_in_operation')
     EIA.extract(endpoint='petroleum/pri/spt/data/', headers = {
         'api_key': os.environ.get('API_KEY'),
         'frequency': 'daily',
