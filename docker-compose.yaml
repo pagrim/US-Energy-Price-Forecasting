@@ -18,6 +18,7 @@ services:
     environment:
       BACKEND_STORE_URI: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/mlflow_db
       ARTIFACT_STORE: s3://us-energy-price-forecasting/artifacts/
+      MODEL_REGISTRY_URI: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/mlflow_db
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
       AWS_REGION: ap-southeast-1
@@ -33,7 +34,7 @@ services:
         --host 0.0.0.0 
         --backend-store-uri $${BACKEND_STORE_URI} 
         --default-artifact-root $${ARTIFACT_STORE}
-    
+        --registry-store-uri $${MODEL_REGISTRY_URI}
 
 volumes:
   pgdata:
