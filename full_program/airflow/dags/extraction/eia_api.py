@@ -66,13 +66,14 @@ class EIA:
             return 'Error occurred', e
     
     @classmethod
-    def get_max_period(cls, data: list) -> str;
+    def get_max_date(cls, data: list) -> str:
+        ''' Retrieves latest end date from data extracted to be logged in metadata '''
         if not data:
             return None
         else: 
-            periods = [datetime.strptime(item['period'], '%Y-%m-%d') for item in data]
-            max_period = max(periods)
-            max_date_str = max_period.strftime('%Y-%m-%d')
+            dates = [datetime.strptime(item['period'], '%Y-%m-%d') for item in data]
+            max_date = max(dates)
+            max_date_str = max_date.strftime('%Y-%m-%d')
             return max_date_str
     
     @classmethod
@@ -85,7 +86,7 @@ class EIA:
         
         Args:
             endpoint (str): Endpoint API request is being made to
-            parameters (dict): Parameters being passed to the API request
+            headers (dict): Parameters being passed to the API request
             folder (str): S3 folder data is going to be ingressed into
             object_key (str): Name of object being ingressed into S3 bucket
             metadata_folder (str): Metadata folder where latest end date for data extraction of given dataset is retrieved from
@@ -106,9 +107,9 @@ class EIA:
             else:
                 break
         
-        max_period = cls.get_max_period(data)
-        if max_period == None:
+        max_date = cls.get_max_date(data)
+        if max_date is None:
             return
         else:
             S3.put_data(data=data, folder=folder, object_key=object_key)
-            S3Metadata.update_metadata(folder=metadata_folder, object_key=metadata_object_key, dataset_key=metadata_dataset_key, new_date=max_period)
+            S3Metadata.update_metadata(folder=metadata_folder, object_key=metadata_object_key, dataset_key=metadata_dataset_key, new_date=max_date)

@@ -14,7 +14,8 @@ def mock_environment_variables(mocker):
         'AWS_ACCESS_KEY_ID': 'access-key',
         'AWS_SECRET_ACCESS_KEY': 'secret-key',
         'S3_BUCKET': 'bucket',
-        'API_KEY': 'api_key'
+        'API_KEY': 'api_key',
+        'TOKEN': 'token'
     })
 
 @pytest.fixture
@@ -61,6 +62,15 @@ def mock_natural_gas_spot_prices_response():
             "value": "2.06", "units": "$/MMBTU"}]
     response_dict = {"response": {"data": data}}
     response_json = json.dumps(response_dict)
+    return response_json
+
+@pytest.fixture
+def mock_noaa_daily_weather_data_response():
+    ''' Mocks data for noaa daily weather data response in NOAA API '''
+    data = [{'date': '1999-01-04', 'datatype': 'AWND', 'station': 'GHCND:USW00094847', 'value': 4.3, 'city':'Detroit', 'state': 'Michigan'},
+            {'date': '1999-01-05', 'datatype': 'AWND', 'station': 'GHCND:USW00094847', 'value': 4.2, 'city':'Detroit', 'state': 'Michigan'},
+            {'date': '2024-05-24', 'datatype': 'AWND', 'station': 'GHCND:USW00094847', 'value': 4.0, 'city':'Detroit', 'state': 'Michigan'}]
+    response_json = json.dumps(data)
     return response_json
 
 @pytest.fixture
