@@ -34,9 +34,10 @@ class NOAA:
     -------
     api_request(parameters):
         Makes an API request to retrieve historical weather data from NOAA API
+    get_max_date(data):
+        Retrieves latest end date from data extracted to be logged in metadata
     extract(parameters, folder, object_key):
         Extract data from request and puts results in an S3 endpoint
-
     '''
     token = os.environ.get('TOKEN')
     url = 'https://www.ncei.noaa.gov/cdo-web/api/v2/data'
@@ -62,7 +63,9 @@ class NOAA:
 
         Args:
             parameters (dict): Parameters to be passed to the API request
-
+        
+        Returns:
+            requests.Response: Response object from API request
         '''
         while True:
             try:
@@ -82,7 +85,14 @@ class NOAA:
     
     @classmethod
     def get_max_date(cls, data: list) -> str:
-        ''' Retrieves latest end date from data extracted to be logged in metadata '''
+        ''' 
+        Retrieves latest end date from data extracted to be logged in metadata
+        Args:
+            data (list): Records in extracted data
+        
+        Returns:
+            str: Latest end date in string format 
+        '''
         if not data:
             return None
         else: 
@@ -101,6 +111,10 @@ class NOAA:
             parameters (dict): Parameters to be passed to the API request
             folder (str): S3 folder data is going to be retrieved from
             object_key (str): Name of object being retrieved
+            metadata_folder (str): Metadata folder where latest end date for data extraction of given dataset is retrieved from
+            metadata_object_key (str): Metadata object where latest end date is being retrieved from
+            metadata_dataset_key (str): Dataset key from metadata where latest end date is being retrieved for
+            start_date_if_none (str): Date to be used for start_date key in headers if there are no dates for a given metadata dataset key
         '''
         data = []
         

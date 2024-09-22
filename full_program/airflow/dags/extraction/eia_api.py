@@ -20,13 +20,14 @@ class EIA:
 
     Methods
     -------
-    api_request(endpoint, headers, offset):
+    api_request(endpoint, headers, metadata_folder, metadata_object_key, metadata_dataset_key, start_date_if_none, offset):
         Makes an API request to a specific endpoint of the Energy Information Administration API
-    extract(endpoint, parameters, folder, object_key, offset):
+    get_max_date(data):
+        Retrieves latest end date from data extracted to be logged in metadata
+    extract(endpoint, headers, folder, object_key, metadata_folder, metadata_object_key, metadata_dataset_key, start_date_if_none, offset):
         Extracts data from a request to a specific endpoint and puts data in a S3 endpoint.
         Maybe multiple requests to a specific endpoint as the API can only return 5000 results
         at once hence adjustment of offset maybe necessary
-    
     '''
     api_key = os.environ.get('API_KEY')
     base_url = 'https://api.eia.gov/v2/'
@@ -42,6 +43,7 @@ class EIA:
             metadata_folder (str): Metadata folder where latest end date for data extraction of given dataset is retrieved from
             metadata_object_key (str): Metadata object where latest end date is being retrieved from
             metadata_dataset_key (str): Dataset key from metadata where latest end date is being retrieved for
+            start_date_if_none (str): Date to be used for start_date key in headers if there are no dates for a given metadata dataset key
             offset (int): Offset in the results. Incremented for results that contain over 5000
             units of data
         
@@ -67,7 +69,14 @@ class EIA:
     
     @classmethod
     def get_max_date(cls, data: list) -> str:
-        ''' Retrieves latest end date from data extracted to be logged in metadata '''
+        ''' 
+        Retrieves latest end date from data extracted to be logged in metadata
+        Args:
+            data (list): Records in extracted data
+        
+        Returns:
+            str: Latest end date in string format 
+        '''
         if not data:
             return None
         else: 
@@ -92,9 +101,9 @@ class EIA:
             metadata_folder (str): Metadata folder where latest end date for data extraction of given dataset is retrieved from
             metadata_object_key (str): Metadata object where latest end date is being retrieved from
             metadata_dataset_key (str): Dataset key from metadata where latest end date is being retrieved for
+            start_date_if_none (str): Date to be used for start_date key in headers if there are no dates for a given metadata dataset key
             offset (int): Offset in the results. Incremented for results that contain over 5000
             units of data
-
         '''
         data = []
         while True:

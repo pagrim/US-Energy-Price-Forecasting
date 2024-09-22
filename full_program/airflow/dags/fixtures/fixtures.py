@@ -48,6 +48,35 @@ def mock_update_metadata(mocker):
     return mock_s3metadata_get_latest_end_date
 
 @pytest.fixture
+def mock_eia_headers():
+    ''' Mocks headers used in EIA api_request and extract methods '''
+    headers = {
+        'api_key': 'api_key',
+        'frequency': 'daily',
+        'data': ['value'],
+        'facets': {
+            'series': ['RNGWHHD',]
+        },
+        'sort': [{
+            'column': 'period',
+            'direction': 'asc'
+        }],
+        'length': 5000
+        }
+    return headers
+
+@pytest.fixture
+def mock_noaa_parameters():
+    ''' Mocks parameters used in NOAA api_request and extract methods '''
+    parameters = {'datasetid': 'GHCND',
+        'datatypeid': ['AWND'],
+        'stationid': 'GHCND:USW00094847',
+        'enddate': '2024-05-24',
+        'units': 'metric',
+        'limit': 1000}
+    return parameters
+
+@pytest.fixture
 def mock_natural_gas_spot_prices_response():
     ''' Mocks data for natural gas spot prices response in EIA API '''
     data = [{"period": "1999-01-04", "duoarea": "RGC", "area-name": "NA", "product": "EPG0", 
@@ -70,7 +99,8 @@ def mock_noaa_daily_weather_data_response():
     data = [{'date': '1999-01-04', 'datatype': 'AWND', 'station': 'GHCND:USW00094847', 'value': 4.3, 'city':'Detroit', 'state': 'Michigan'},
             {'date': '1999-01-05', 'datatype': 'AWND', 'station': 'GHCND:USW00094847', 'value': 4.2, 'city':'Detroit', 'state': 'Michigan'},
             {'date': '2024-05-24', 'datatype': 'AWND', 'station': 'GHCND:USW00094847', 'value': 4.0, 'city':'Detroit', 'state': 'Michigan'}]
-    response_json = json.dumps(data)
+    response_dict = {"results": data}
+    response_json = json.dumps(response_dict)
     return response_json
 
 @pytest.fixture

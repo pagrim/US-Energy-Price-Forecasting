@@ -1,4 +1,5 @@
 ''' Import modules '''
+import json
 import pytest
 from unittest.mock import MagicMock
 from utils.aws import *
