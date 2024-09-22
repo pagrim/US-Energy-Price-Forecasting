@@ -1,5 +1,6 @@
-import pandas as pd
+''' Import modules '''
 import json
+import pandas as pd
 from aws import S3
 
 class EtlUtils:
