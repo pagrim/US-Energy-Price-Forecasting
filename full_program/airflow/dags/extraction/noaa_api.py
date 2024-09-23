@@ -32,11 +32,11 @@ class NOAA:
 
     Methods
     -------
-    api_request(parameters):
+    api_request(cls, parameters):
         Makes an API request to retrieve historical weather data from NOAA API
-    get_max_date(data):
+    get_max_date(cls, data):
         Retrieves latest end date from data extracted to be logged in metadata
-    extract(parameters, folder, object_key):
+    extract(cls, parameters, folder, object_key):
         Extract data from request and puts results in an S3 endpoint
     '''
     token = os.environ.get('TOKEN')

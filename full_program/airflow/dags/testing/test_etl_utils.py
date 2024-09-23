@@ -27,10 +27,10 @@ class TestEtlUtils:
         '''
         Tests drop_columns function of EtlUtils class
         '''
-        data = [{'date': '1999-01-04', 'datatype': 'AWND', 'value': 4.3, 'city':'Detroit', 'state': 'Michigan'},
-        {'date': '1999-01-04', 'datatype': 'AWND', 'value': 4.3, 'city':'Detroit', 'state': 'Michigan'},
-        {'date': '1999-01-05', 'datatype': 'AWND', 'value': 4.2, 'city':'Detroit', 'state': 'Michigan'},
-        {'date': '2024-05-24', 'datatype': 'AWND', 'value': 4.0, 'city':'Detroit', 'state': 'Michigan'}]
+        data = [{'date': '1999-01-04', 'datatype': 'AWND', 'value': 4.3, 'city': 'Detroit', 'state': 'Michigan'},
+        {'date': '1999-01-04', 'datatype': 'AWND', 'value': 4.3, 'city': 'Detroit', 'state': 'Michigan'},
+        {'date': '1999-01-05', 'datatype': 'AWND', 'value': 4.2, 'city': 'Detroit', 'state': 'Michigan'},
+        {'date': '2024-05-24', 'datatype': 'AWND', 'value': 4.0, 'city': 'Detroit', 'state': 'Michigan'}]
         expected_df = pd.DataFrame(data)
         result_df = EtlUtils.drop_columns(df=df_etl_utils_testing, columns=['station'])
         pd.testing.assert_frame_equal(result_df, expected_df)
@@ -41,9 +41,9 @@ class TestEtlUtils:
         '''
         renamed_columns = {'date': 'Date', 'datatype': 'DataType', 'station': 'Station', 'value': 'Value', 'city': 'City', 'state': 'State'}
         data = [{'Date': '1999-01-04', 'Datatype': 'AWND', 'Station': 'GHCND:USW00094847', 'Value': 4.3, 'City':'Detroit', 'State': 'Michigan'},
-        {'Date': '1999-01-04', 'Datatype': 'AWND', 'Station': 'GHCND:USW00094847', 'Value': 4.3, 'City':'Detroit', 'State': 'Michigan'},
-        {'Date': '1999-01-05', 'Datatype': 'AWND', 'Station': 'GHCND:USW00094847', 'Value': 4.2, 'City':'Detroit', 'State': 'Michigan'},
-        {'Date': '2024-05-24', 'Datatype': 'AWND', 'Station': 'GHCND:USW00094847', 'Value': 4.0, 'City':'Detroit', 'State': 'Michigan'}]
+        {'Date': '1999-01-04', 'Datatype': 'AWND', 'Station': 'GHCND:USW00094847', 'Value': 4.3, 'City': 'Detroit', 'State': 'Michigan'},
+        {'Date': '1999-01-05', 'Datatype': 'AWND', 'Station': 'GHCND:USW00094847', 'Value': 4.2, 'City': 'Detroit', 'State': 'Michigan'},
+        {'Date': '2024-05-24', 'Datatype': 'AWND', 'Station': 'GHCND:USW00094847', 'Value': 4.0, 'City': 'Detroit', 'State': 'Michigan'}]
         expected_df = pd.DataFrame(data)
         result_df = EtlUtils.rename_columns(df=df_etl_utils_testing, renamed_columns=renamed_columns)
         pd.testing.assert_frame_equal(result_df, expected_df)

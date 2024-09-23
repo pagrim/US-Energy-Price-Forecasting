@@ -20,11 +20,11 @@ class EIA:
 
     Methods
     -------
-    api_request(endpoint, headers, metadata_folder, metadata_object_key, metadata_dataset_key, start_date_if_none, offset):
+    api_request(cls, endpoint, headers, metadata_folder, metadata_object_key, metadata_dataset_key, start_date_if_none, offset):
         Makes an API request to a specific endpoint of the Energy Information Administration API
-    get_max_date(data):
+    get_max_date(cls, data):
         Retrieves latest end date from data extracted to be logged in metadata
-    extract(endpoint, headers, folder, object_key, metadata_folder, metadata_object_key, metadata_dataset_key, start_date_if_none, offset):
+    extract(cls, endpoint, headers, folder, object_key, metadata_folder, metadata_object_key, metadata_dataset_key, start_date_if_none, offset):
         Extracts data from a request to a specific endpoint and puts data in a S3 endpoint.
         Maybe multiple requests to a specific endpoint as the API can only return 5000 results
         at once hence adjustment of offset maybe necessary

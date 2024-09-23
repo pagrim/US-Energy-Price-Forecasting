@@ -5,6 +5,18 @@ from datetime import datetime
 class NoaaTransformation:
     '''
     Class for performing transformations on data extracted from NOAA API
+
+    Methods
+    -------
+    modify_date(cls, df):
+        Modify date column and creater quarter column for daily weather data
+    imputation_df(cls, df):
+        Creates dataframe that computes mean values for TMIN, TMAX, AWND, PRCP and SNOW
+        for all cities across all quarters
+    impute_missing_weather_variables(cls, df, imputation_df):
+        Imputes rows which have a missing value for TMIN, TMAX, AWND and SNOW values
+    calculate_missing_tavg(cls, df):
+        Calculates TAVG (average temperature) for rows where it is missing
     '''
     @classmethod
     def modify_date(cls, df: pd.DataFrame) -> pd.DataFrame:
@@ -43,9 +55,9 @@ class NoaaTransformation:
         for city in df['city'].unique():
             for quarter, relevant_months in quarter_months.items():
                 filtered_df = df[(df['city'] == city) & (df['date'].dt.month.isin(relevant_months))]
-                mean_tmin = filtered_df[filtered_df['datatype'] == 'TMIN']['value'].mean()
-                mean_tmax = filtered_df[filtered_df['datatype'] == 'TMAX']['value'].mean()
-                mean_awnd = filtered_df[filtered_df['datatype'] == 'AWND']['value'].mean()
+                mean_tmin = round(filtered_df[filtered_df['datatype'] == 'TMIN']['value'].mean(), 2)
+                mean_tmax = round(filtered_df[filtered_df['datatype'] == 'TMAX']['value'].mean(), 2)
+                mean_awnd = round(filtered_df[filtered_df['datatype'] == 'AWND']['value'].mean(), 2)
                 median_snow = filtered_df[filtered_df['datatype'] == 'SNOW']['value'].median()
                 median_snow = median_snow if not pd.isnull(median_snow) else 0 # Null values where returned for Q1 + Q4 in LA + SF
                 new_rows_df = pd.DataFrame([{'city': city, 'quarter': quarter, 'datatype': 'TMIN', 'impute method': 'Mean', 'impute value': mean_tmin},
@@ -58,7 +70,7 @@ class NoaaTransformation:
     @classmethod
     def impute_missing_weather_variables(cls, df: pd.DataFrame, imputation_df: pd.DataFrame) -> pd.DataFrame:
         '''
-        Imputes rows which have a missing value for TMIN, TMAX, AWND, PRCP and SNOW values
+        Imputes rows which have a missing value for TMIN, TMAX, AWND and SNOW values
 
         Args:
             df (pd.DataFrame): Daily weather data df

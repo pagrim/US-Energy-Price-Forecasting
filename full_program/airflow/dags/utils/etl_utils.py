@@ -1,7 +1,6 @@
 ''' Import modules '''
 import json
 import pandas as pd
-from aws import S3
 
 class EtlUtils:
     '''
@@ -17,6 +16,8 @@ class EtlUtils:
         Drops columns from dataframe and returns modified dataframe
     drop_duplicates(cls, df):
         Drops duplicate rows from dataframe and returns modified dataframe
+    rename_columns(cls, df):
+        Renames columns in dataframe and returns dataframe with new column names
     '''
     @classmethod
     def json_to_df(cls, data: json) -> pd.DataFrame:
