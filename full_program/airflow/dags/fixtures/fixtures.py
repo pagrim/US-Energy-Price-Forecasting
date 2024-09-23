@@ -4,6 +4,7 @@ import json
 import pytest
 import requests_mock
 import boto3
+import pandas as pd
 from unittest.mock import patch, MagicMock
 from utils.aws import S3, S3Metadata
 
@@ -114,6 +115,18 @@ def mock_metadata_response():
     }
     response_json = json.dumps(data)
     return response_json
+
+@pytest.fixture
+def df_etl_utils_testing():
+    ''' Dataframe to be used for testing of EtlUtils class '''
+    data = [{'date': '1999-01-04', 'datatype': 'AWND', 'station': 'GHCND:USW00094847', 'value': 4.3, 'city':'Detroit', 'state': 'Michigan'},
+    {'date': '1999-01-04', 'datatype': 'AWND', 'station': 'GHCND:USW00094847', 'value': 4.3, 'city':'Detroit', 'state': 'Michigan'},
+    {'date': '1999-01-05', 'datatype': 'AWND', 'station': 'GHCND:USW00094847', 'value': 4.2, 'city':'Detroit', 'state': 'Michigan'},
+    {'date': '2024-05-24', 'datatype': 'AWND', 'station': 'GHCND:USW00094847', 'value': 4.0, 'city':'Detroit', 'state': 'Michigan'}]
+    df = pd.DataFrame(data)
+    return df
+
+
 
 
 

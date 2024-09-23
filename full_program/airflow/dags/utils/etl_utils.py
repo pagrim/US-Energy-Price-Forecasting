@@ -59,8 +59,8 @@ class EtlUtils:
         Returns:
             pd.DataFrame: Dataframe with specific columns removed
         '''
-        new_df = df.drop(columns=columns, axis=1)
-        return new_df
+        df = df.drop(columns=columns, axis=1)
+        return df
     
     @classmethod
     def drop_duplicates(cls, df: pd.DataFrame) -> pd.DataFrame:
@@ -73,8 +73,25 @@ class EtlUtils:
         Returns:
             pd.DataFrame: Dataframe with specific columns removed
         '''
-        new_df = df.drop_duplicates(axis=1)
-        return new_df
+        df = df.drop_duplicates(axis=1)
+        return df
+    
+    @classmethod
+    def rename_columns(cls, df: pd.DataFrame, renamed_columns: dict) -> pd.DataFrame:
+        '''
+        Renames columns in a given dataframe
+
+        Args:
+            df (pd.DataFrame): Pandas dataframe where columns are going to be renamed
+            renamed_columns (dict): Key value pair representing original column name and new column name
+        
+        Returns:
+            pd.DataFrame: Dataframe with renamed columns
+        '''
+        df = df.rename(columns=renamed_columns)
+        return df
+    
+
 
     
 

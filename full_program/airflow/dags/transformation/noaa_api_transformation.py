@@ -46,13 +46,11 @@ class NoaaTransformation:
                 mean_tmin = filtered_df[filtered_df['datatype'] == 'TMIN']['value'].mean()
                 mean_tmax = filtered_df[filtered_df['datatype'] == 'TMAX']['value'].mean()
                 mean_awnd = filtered_df[filtered_df['datatype'] == 'AWND']['value'].mean()
-                median_prcp = filtered_df[filtered_df['datatype'] == 'PRCP']['value'].median()
                 median_snow = filtered_df[filtered_df['datatype'] == 'SNOW']['value'].median()
                 median_snow = median_snow if not pd.isnull(median_snow) else 0 # Null values where returned for Q1 + Q4 in LA + SF
                 new_rows_df = pd.DataFrame([{'city': city, 'quarter': quarter, 'datatype': 'TMIN', 'impute method': 'Mean', 'impute value': mean_tmin},
                 {'city': city, 'quarter': quarter, 'datatype': 'TMAX', 'impute method': 'Mean', 'impute value': mean_tmax},
                 {'city': city, 'quarter': quarter, 'datatype': 'AWND', 'impute method': 'Mean', 'impute value': mean_awnd},
-                {'city': city, 'quarter': quarter, 'datatype': 'PRCP', 'impute method': 'Median', 'impute value': median_prcp},
                 {'city': city, 'quarter': quarter, 'datatype': 'SNOW', 'impute method': 'Median', 'impute value': median_snow}])
                 output_df = pd.concat([output_df, new_rows_df], ignore_index=True)
         return output_df
@@ -88,6 +86,37 @@ class NoaaTransformation:
         new_rows_df = pd.DataFrame(new_rows)
         df = pd.concat([df, new_rows_df], ignore_index=True)
         return df
+    
+    @classmethod
+    def calculate_missing_tavg(cls, df: pd.DataFrame) -> pd.DataFrame:
+        '''
+        Calculates TAVG (average temperature) for rows where it is missing
+
+        Args:
+            df (pd.DataFrame): Daily weather data df
+        
+        Returns:
+            pd.DataFrame: Returns modified dataframe
+        '''
+        tmin_rows = df[df['datatype'] == 'TMIN']
+        tmax_rows = df[df['datatype'] == 'TMAX']
+        merged_df = pd.merge(tmin_rows, tmax_rows, on=['city', 'date'])
+        merged_df['tavg_value'] = (merged_df['value_x'] + merged_df['value_y']) / 2
+        tavg_rows = df[df['datatype'] == 'TAVG']
+        merged_df['combined'] = merged_df['city'] + merged_df['date'].astype(str)
+        tavg_rows_combined = tavg_rows['city'] + tavg_rows['date'].astype(str)
+        missing_tavg_rows = merged_df[~merged_df['combined'].isin(tavg_rows_combined)]
+        new_rows = missing_tavg_rows[['date', 'city']]
+        new_rows['datatype'] = 'TAVG'
+        new_rows['station'] = missing_tavg_rows['station_x']
+        new_rows['value'] = missing_tavg_rows['tavg_value']
+        new_rows['state'] = missing_tavg_rows['state_x']
+        new_rows['quarter'] = missing_tavg_rows['quarter_x']
+        df = pd.concat([df, new_rows], ignore_index=True)
+        return df
+
+
+
 
 
 
