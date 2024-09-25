@@ -18,6 +18,10 @@ class EtlUtils:
         Drops duplicate rows from dataframe and returns modified dataframe
     rename_columns(cls, df):
         Renames columns in dataframe and returns dataframe with new column names
+    pivot_columns(cls, df):
+        Pivots columns in dataframe and returns modified dataframe
+    drop_null(cls, df):
+        Drops all null rows in dataframe and returns modified dataframe
     '''
     @classmethod
     def json_to_df(cls, data: json) -> pd.DataFrame:
@@ -93,13 +97,17 @@ class EtlUtils:
         return df
     
     @classmethod
-    def pivot_columns(cls, df: pd.DataFrame, index: list, column: str, value: str):
+    def pivot_columns(cls, df: pd.DataFrame, index: list, column: str, value: str) -> pd.DataFrame:
         ''' Pivots columns in a given dataframe '''
         df = df.pivot(index=index, columns=column, values=value).reset_index()
         df.columns.name = None
         return df
-
-
+    
+    @classmethod
+    def drop_null(cls, df: pd.DataFrame) -> pd.DataFrame:
+        ''' Drops null rows in a given dataframe '''
+        df = df.dropna()
+        return df
     
 
 

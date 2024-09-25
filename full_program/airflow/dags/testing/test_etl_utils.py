@@ -30,6 +30,7 @@ class TestEtlUtils:
         data = [{'date': '1999-01-04', 'datatype': 'AWND', 'value': 4.3, 'city': 'Detroit', 'state': 'Michigan'},
         {'date': '1999-01-04', 'datatype': 'AWND', 'value': 4.3, 'city': 'Detroit', 'state': 'Michigan'},
         {'date': '1999-01-05', 'datatype': 'AWND', 'value': 4.2, 'city': 'Detroit', 'state': 'Michigan'},
+        {'date': '1999-01-06', 'datatype': 'AWND', 'value': None, 'city': 'Detroit', 'state': 'Michigan'}
         {'date': '2024-05-24', 'datatype': 'AWND', 'value': 4.0, 'city': 'Detroit', 'state': 'Michigan'}]
         expected_df = pd.DataFrame(data)
         result_df = EtlUtils.drop_columns(df=df_etl_utils_testing, columns=['station'])
@@ -43,6 +44,7 @@ class TestEtlUtils:
         data = [{'Date': '1999-01-04', 'Datatype': 'AWND', 'Station': 'GHCND:USW00094847', 'Value': 4.3, 'City':'Detroit', 'State': 'Michigan'},
         {'Date': '1999-01-04', 'Datatype': 'AWND', 'Station': 'GHCND:USW00094847', 'Value': 4.3, 'City': 'Detroit', 'State': 'Michigan'},
         {'Date': '1999-01-05', 'Datatype': 'AWND', 'Station': 'GHCND:USW00094847', 'Value': 4.2, 'City': 'Detroit', 'State': 'Michigan'},
+        {'Date': '1999-01-06', 'Datatype': 'AWND', 'Station': 'GHCND:USW00094847', 'Value': None, 'City': 'Detroit', 'State': 'Michigan'},
         {'Date': '2024-05-24', 'Datatype': 'AWND', 'Station': 'GHCND:USW00094847', 'Value': 4.0, 'City': 'Detroit', 'State': 'Michigan'}]
         expected_df = pd.DataFrame(data)
         result_df = EtlUtils.rename_columns(df=df_etl_utils_testing, renamed_columns=renamed_columns)
@@ -57,11 +59,29 @@ class TestEtlUtils:
         value = 'value'
         data = [{'date': '1999-01-04', 'AWND': 4.3},
         {'date': '1999-01-05', 'AWND': 4.2},
+        {'date': '1999-01-06', 'AWND': None},
         {'date': '2024-05-24', 'AWND': 4.0}]
         expected_df = pd.DataFrame(data)
         expected_df = expected_df.set_index('date')
         result_df = EtlUtils.pivot_columns(df=df_etl_utils_testing, index=index, column=column, value=value)
         pd.testing.assert_frame_equal(result_df, expected_df)
+    
+    def test_drop_null(self, df_etl_utils_testing):
+        '''
+        Tests drop_null function of EtlUtils class
+        '''
+        data = [{'date': '1999-01-04', 'datatype': 'AWND', 'station': 'GHCND:USW00094847', 'value': 4.3, 'city': 'Detroit', 'state': 'Michigan'},
+        {'date': '1999-01-04', 'datatype': 'AWND', 'station': 'GHCND:USW00094847', 'value': 4.3, 'city': 'Detroit', 'state': 'Michigan'},
+        {'date': '1999-01-05', 'datatype': 'AWND', 'station': 'GHCND:USW00094847', 'value': 4.2, 'city': 'Detroit', 'state': 'Michigan'},
+        {'date': '2024-05-24', 'datatype': 'AWND', 'station': 'GHCND:USW00094847', 'value': 4.0, 'city': 'Detroit', 'state': 'Michigan'}]
+        expected_df = pd.DataFrame(data)
+        result_df = EtlUtils.drop_null(df=df_etl_utils_testing)
+        pd.testing.assert_frame_equal(result_df, expected_df)
+
+
+
+
+
 
         
 
