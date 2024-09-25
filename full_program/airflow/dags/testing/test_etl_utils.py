@@ -47,6 +47,24 @@ class TestEtlUtils:
         expected_df = pd.DataFrame(data)
         result_df = EtlUtils.rename_columns(df=df_etl_utils_testing, renamed_columns=renamed_columns)
         pd.testing.assert_frame_equal(result_df, expected_df)
+    
+    def test_pivot_columns(self, df_etl_utils_testing):
+        '''
+        Tests pivot_columns function of EtlUtils class
+        '''
+        index = ['date']
+        column = 'datatype'
+        value = 'value'
+        data = [{'date': '1999-01-04', 'AWND': 4.3},
+        {'date': '1999-01-05', 'AWND': 4.2},
+        {'date': '2024-05-24', 'AWND': 4.0}]
+        expected_df = pd.DataFrame(data)
+        expected_df = expected_df.set_index('date')
+        result_df = EtlUtils.pivot_columns(df=df_etl_utils_testing, index=index, column=column, value=value)
+        pd.testing.assert_frame_equal(result_df, expected_df)
+
+        
+
 
 
 

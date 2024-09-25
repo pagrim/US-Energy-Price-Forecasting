@@ -92,6 +92,15 @@ class EtlUtils:
         df = df.rename(columns=renamed_columns)
         return df
     
+    @classmethod
+    def pivot_columns(cls, df: pd.DataFrame, index: list, column: str, value: str):
+        ''' Pivots columns in a given dataframe '''
+        df = df.pivot(index=index, columns=column, values=value).reset_index()
+        df.columns.name = None
+        return df
+
+
+    
 
 
     
