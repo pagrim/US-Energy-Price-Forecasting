@@ -162,6 +162,27 @@ def df_noaa_transformation_testing_impute_missing_weather_variables():
     df = pd.DataFrame(data)
     return df
 
+@pytest.fixture
+def df_eia_transformation_testing():
+    '''
+    Dataframe to be used for testing of EiaTransformation class
+    '''
+    data = [{'period': '2014-05-01', 'LNG Imports (Price)': 5.99},
+    {'period': '2014-06-01', 'LNG Imports (Price)': 10.48},
+    {'period': '2014-07-01', 'LNG Imports (Price)': 11.80},
+    {'period': '2014-08-01', 'LNG Imports (Price)': 6.56},
+    {'period': '2014-09-01', 'LNG Imports (Price)': 8.73},
+    {'period': '2014-10-01', 'LNG Imports (Price)': 4.63},
+    {'period': '2014-11-01', 'LNG Imports (Price)': None},
+    {'period': '2014-12-01', 'LNG Imports (Price)': 7.45},
+    {'period': '2015-01-01', 'LNG Imports (Price)': 10.90},
+    {'period': '2015-02-01', 'LNG Imports (Price)': 9.13},
+    {'period': '2015-03-01', 'LNG Imports (Price)': 8.10},
+    {'period': '2015-04-01', 'LNG Imports (Price)': 8.31},
+    {'period': '2015-01-01', 'LNG Imports (Price)': 6.04}]
+    df = pd.DataFrame(data)
+    return df
+
 
 
 

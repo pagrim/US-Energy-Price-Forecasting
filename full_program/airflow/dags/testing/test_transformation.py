@@ -2,7 +2,8 @@
 import pytest
 import pandas as pd
 from transformation.noaa_api_transformation import *
-from fixtures.fixtures import df_noaa_transformation_testing, df_noaa_transformation_testing_impute_missing_weather_variables
+from transformation.eia_api_transformation import *
+from fixtures.fixtures import df_noaa_transformation_testing, df_noaa_transformation_testing_impute_missing_weather_variables, df_eia_transformation_testing
 
 class TestNoaaTransformation:
     ''' 
@@ -79,6 +80,34 @@ class TestNoaaTransformation:
         expected_df = pd.DataFrame(data)
         result_df = NoaaTransformation.calculate_missing_tavg(df=df_noaa_transformation_testing)
         pd.testing.assert_frame_equal(result_df, expected_df)
+
+class TestEiaTransformation:
+    ''' 
+    Test class for testing EiaTransformation class 
+    '''
+    def test_impute_null_monthly_variable(self, df_eia_transformation_testing):
+        '''
+        Tests impute_null_monthly_variable function of EiaTransformation Class
+        '''
+        data = [{'period': '2014-05-01', 'LNG Imports (Price)': 5.99},
+        {'period': '2014-06-01', 'LNG Imports (Price)': 10.48},
+        {'period': '2014-07-01', 'LNG Imports (Price)': 11.80},
+        {'period': '2014-08-01', 'LNG Imports (Price)': 6.56},
+        {'period': '2014-09-01', 'LNG Imports (Price)': 8.73},
+        {'period': '2014-10-01', 'LNG Imports (Price)': 4.63},
+        {'period': '2014-11-01', 'LNG Imports (Price)': 8.21},
+        {'period': '2014-12-01', 'LNG Imports (Price)': 7.45},
+        {'period': '2015-01-01', 'LNG Imports (Price)': 10.90},
+        {'period': '2015-02-01', 'LNG Imports (Price)': 9.13},
+        {'period': '2015-03-01', 'LNG Imports (Price)': 8.10},
+        {'period': '2015-04-01', 'LNG Imports (Price)': 8.31},
+        {'period': '2015-01-01', 'LNG Imports (Price)': 6.04}]
+        expected_df = pd.DataFrame(data)
+        result_df = EiaTransformation.impute_null_monthly_variable(df=df_eia_transformation_testing)
+        pd.testing.assert_frame_equal(result_df, expected_df)
+
+    
+
     
 
 
