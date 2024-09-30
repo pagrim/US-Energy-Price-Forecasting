@@ -1,4 +1,5 @@
 ''' Import modules '''
+import numpy as np
 import pandas as pd
 from datetime import datetime
 
@@ -17,6 +18,20 @@ class NoaaTransformation:
         Imputes rows which have a missing value for TMIN, TMAX, AWND and SNOW values
     calculate_missing_tavg(cls, df):
         Calculates TAVG (average temperature) for rows where it is missing
+    maximum_hdd(cls, df):
+        Calculates maximum heating degree day for a given date across all states
+    maximum_cdd(cls, df):
+        Calculates maximum cooling degree day for a given date across all states
+    wci_sum(cls, df):
+        Creates aggregated wind chill index (wci) across all states
+    snow_sum(cls, df):
+        Creates aggregated amount of snow across all states
+    min_and_max_average_temperature(cls, df):
+        Creates maximum and minimum average temperature for any given state for each date
+    max_abs_tavg_diff(cls, df):
+        Creates absolute largest day-on-day average temperature movement across all states
+    max_abs_tavg_diff_relative_daily_median(cls, df):
+        Creates absolute value largest temperature difference relative to daily median across all states
     '''
     @classmethod
     def modify_date(cls, df: pd.DataFrame) -> pd.DataFrame:
@@ -126,6 +141,141 @@ class NoaaTransformation:
         new_rows['quarter'] = missing_tavg_rows['quarter_x']
         df = pd.concat([df, new_rows], ignore_index=True)
         return df
+    
+    @classmethod
+    def maximum_hdd(cls, df: pd.DataFrame) -> pd.DataFrame:
+        '''
+        Calculates maximum heating degree day for a given date across all states
+
+        Args:
+            df (pd.DataFrame): Daily weather data df
+        
+        Returns:
+            pd.DataFrame: Returns modified dataframe
+        '''
+        df['hdd'] = np.maximum(0, 18.33 - df['tavg'])
+        hdd_aggregation_by_state = df.groupby([df.index, 'state'])['hdd'].agg(hdd_max='sum').reset_index()
+        hdd_aggregation_max = hdd_aggregation_by_state.groupby('date')['hdd_max'].max()
+        df = pd.merge(df, hdd_aggregation_max, left_index=True, right_index=True)
+        return df
+    
+    @classmethod
+    def maximum_cdd(cls, df: pd.DataFrame) -> pd.DataFrame:
+        '''
+        Calculates maximum cooling degree day for a given date across all states
+
+        Args:
+            df (pd.DataFrame): Daily weather data df
+        
+        Returns:
+            pd.DataFrame: Returns modified dataframe
+        '''
+        df['cdd'] = np.maximum(0, df['tavg'] - 18.33)
+        cdd_aggregation_by_state = df.groupby([df.index, 'state'])['hdd'].agg(cdd_max='sum').reset_index()
+        cdd_aggregation_max = cdd_aggregation_by_state.groupby('date')['cdd_max'].max()
+        df = pd.merge(df, cdd_aggregation_max, left_index=True, right_index=True)
+        return df
+    
+    @classmethod
+    def wci_sum(cls, df: pd.DataFrame) -> pd.DataFrame:
+        ''' 
+        Creates aggregated wind chill index (wci) across all states
+
+        Args:
+            df (pd.DataFrame): Daily weather data df
+        
+        Returns:
+            pd.DataFrame: Returns modified dataframe
+        '''
+        wci_aggregation = df.groupby(df.index)['wci'].agg(wci_sum='sum')
+        df = pd.merge(df, wci_aggregation, left_index=True, right_index=True)
+        return df
+    
+    @classmethod
+    def snow_sum(cls, df: pd.DataFrame) -> pd.DataFrame:
+        '''
+        Creates aggregated amount of snow across all states
+
+        Args:
+            df (pd.DataFrame): Daily weather data df
+        
+        Returns:
+            pd.DataFrame: Returns modified dataframe
+        '''
+        snow_aggregation = df.groupby(df.index)['snow'].agg(snow_sum='sum')
+        df = pd.merge(df, snow_aggregation, left_index=True, right_index=True)
+        return df
+
+    @classmethod
+    def min_and_max_average_temperature(cls, df: pd.DataFrame) -> pd.DataFrame:
+        '''
+        Creates maximum and minimum average temperature for any given state for each date
+
+        Args:
+            df (pd.DataFrame)
+
+        Returns:
+            pd.DataFrame: Returns modified dataframe
+        '''
+        avg_tavg_by_state = df.groupby([df.index, 'state'])['tavg'].mean().reset_index()
+        min_max_tavg_per_date = avg_tavg_by_state.groupby('date')['tavg'].agg(min_tavg='min', max_tavg='max')
+        df = pd.merge(df, min_max_tavg_per_date, left_index=True, right_index=True)
+        return df
+    
+    @classmethod
+    def max_abs_tavg_diff(cls, df: pd.DataFrame) -> pd.DataFrame:
+        '''
+        Creates absolute largest day-on-day average temperature movement across all states
+
+        Args:
+            df (pd.DataFrame)
+        
+        Returns:
+            pd.DataFrame: Returns modified dataframe
+        '''
+        avg_tavg_by_state = df.groupby([df.index, 'state'])['tavg'].mean().reset_index()
+        avg_tavg_by_state['tavg_abs_diff'] = avg_tavg_by_state.groupby('state')['tavg'].diff().abs()
+        max_abs_tavg_diff_per_date = avg_tavg_by_state.groupby('date')['tavg_abs_diff'].max()
+        max_abs_tavg_diff_per_date.name = 'max_abs_tavg_diff'
+        df = pd.merge(df, max_abs_tavg_diff_per_date, left_index=True, right_index=True)
+        return df
+    
+    @classmethod
+    def max_abs_tavg_diff_relative_daily_median(cls, df: pd.DataFrame) -> pd.DataFrame:
+        '''
+        Creates absolute value largest temperature difference relative to daily median across all states
+
+        Args:
+            df(pd.DataFrame)
+        
+        Returns:
+            pd.DataFrame: Returns modified dataframe
+        '''
+        df_copy = df
+        df_copy = df_copy.groupby([df_copy.index, 'state'])['tavg'].mean().reset_index()
+        df_copy['month'] = df_copy['date'].dt.month
+        df_copy['week'] = df_copy['date'].dt.isocalendar().week
+        df_copy['day'] = df_copy['date'].dt.day
+        daily_median_tavg_by_state = df_copy.groupby(['state', 'month', 'week', 'day'])['tavg'].median().reset_index()
+        df_copy = pd.merge(df_copy, daily_median_tavg_by_state, on=['state', 'month', 'week', 'day'], suffixes=('', '_daily_median'), how='left')
+        df_copy = df_copy.set_index('date')
+        df_copy['tavg_abs_diff_relative_to_daily_median'] = (df_copy['tavg'] - df_copy['tavg_daily_median']).abs()
+        max_abs_tavg_diff_relative_to_daily_median_df = df_copy.groupby(df_copy.index)['tavg_abs_diff_relative_to_daily_median'].max()
+        max_abs_tavg_diff_relative_to_daily_median_df.name = 'max_abs_tavg_diff_relative_to_daily_median'
+        df = pd.merge(df, max_abs_tavg_diff_relative_to_daily_median_df, left_index=True, right_index=True)
+        return df
+
+
+
+
+
+
+        
+
+    
+
+
+
 
 
 

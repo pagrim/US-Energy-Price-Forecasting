@@ -105,6 +105,8 @@ class TestEiaTransformation:
         expected_df = pd.DataFrame(data)
         result_df = EiaTransformation.impute_null_monthly_variable(df=df_eia_transformation_testing)
         pd.testing.assert_frame_equal(result_df, expected_df)
+    
+    
 
     
 
