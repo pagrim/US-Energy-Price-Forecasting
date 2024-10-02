@@ -183,6 +183,37 @@ def df_eia_transformation_testing():
     df = pd.DataFrame(data)
     return df
 
+@pytest.fixture
+def df_noaa_feature_engineering_testing():
+    '''
+    Dataframe to be used for testing functions used for feature engineering in NoaaTransformation class
+    Will be used to test the following functions:
+        maximum_hdd(cls, df)
+        maximum_cdd(cls, df)
+        wci_sum(cls, df)
+        snow_sum(cls, df)
+        min_and_max_average_temperature(cls, df)
+        max_abs_tavg_diff(cls, df)
+        max_abs_tavg_diff_relative_daily_median(cls, df)
+    '''
+    data = [{'date': ['1999-01-05', '1999-01-05', '1999-01-05', '1999-01-06', '1999-01-06', '1999-01-06', '1999-01-07', '1999-01-07', '1999-01-07',
+    '2000-01-05', '2000-01-05', '2000-01-05', '2000-01-06', '2000-01-06', '2000-01-06', '2000-01-07', '2000-01-07', '2000-01-07', 
+    '2004-01-05', '2004-01-05', '2004-01-05', '2004-01-06', '2004-01-06', '2004-01-06', '2004-01-07', '2004-01-07', '2004-01-07'],
+    'state': ['Florida', 'Illinois', 'New York', 'Florida', 'Illinois', 'New York', 'Florida', 'Illinois', 'New York',
+    'Florida', 'Illinois', 'New York', 'Florida', 'Illinois', 'New York', 'Florida', 'Illinois', 'New York', 
+    'Florida', 'Illinois', 'New York', 'Florida', 'Illinois', 'New York', 'Florida', 'Illinois', 'New York'],
+    'city': ['Miami', 'Chicago', 'New York', 'Miami', 'Chicago', 'New York', 'Miami', 'Chicago', 'New York',
+    'Miami', 'Chicago', 'New York', 'Miami', 'Chicago', 'New York', 'Miami', 'Chicago', 'New York', 
+    'Miami', 'Chicago', 'New York', 'Miami', 'Chicago', 'New York', 'Miami', 'Chicago', 'New York'],
+    'wci': [10, 5, 1, 8, 7, 4, 2, 10, 4, 0, 2, 1, 3, 4, 2, 1, 5, 3, 1, 15, 8, 3, 17, 12, 4, 6, 7],
+    'snow': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 3, 0, 2, 1, 0, 6, 4, 2],
+    'tavg': [0, 15, 17, 0, 13, 15, 17, 16, 16, 17, 17, 17, 16, 17, 30, -3, -1, 15, 6, 7, 0, 25, -10, -6, 22, -15, -10]}]
+    df = pd.DataFrame(data)
+    df['date'] = pd.to_datetime(df['date'])
+    df = df.set_index('date')
+    return df
+
+
 
 
 
