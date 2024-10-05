@@ -66,7 +66,7 @@ class EiaTransformation:
         
         Returns:
             pd.DataFrame: Returns modified dataframe '''
-        df['heating_oil_natural_gas_price_ratio'] = df['price_heating_oil ($/GAL)'] / df['price ($/MMBTU)']
+        df['heating_oil_natural_gas_price_ratio'] = round(df['price_heating_oil ($/GAL)'] / df['price ($/MMBTU)'], 2)
         return df
 
     @classmethod
@@ -78,10 +78,10 @@ class EiaTransformation:
         
         Returns:
             pd.DataFrame: Returns modified dataframe '''
-        df['7day_ew_volatility price ($/MMBTU)'] = df['price ($/MMBTU)'].ewm(span=7, min_periods=7).std()
-        df['14day_ew_volatility price ($/MMBTU)'] = df['price ($/MMBTU)'].ewm(span=14, min_periods=14).std()
-        df['30day_ew_volatility price ($/MMBTU)'] = df['price ($/MMBTU)'].ewm(span=30, min_periods=30).std()
-        df['60day_ew_volatility price ($/MMBTU)'] = df['price ($/MMBTU)'].ewm(span=60, min_periods=60).std()
+        df['7day_ew_volatility price ($/MMBTU)'] = round(df['price ($/MMBTU)'].ewm(span=7, min_periods=7).std(), 2)
+        df['14day_ew_volatility price ($/MMBTU)'] = round(df['price ($/MMBTU)'].ewm(span=14, min_periods=14).std(), 2)
+        df['30day_ew_volatility price ($/MMBTU)'] = round(df['price ($/MMBTU)'].ewm(span=30, min_periods=30).std(), 2)
+        df['60day_ew_volatility price ($/MMBTU)'] = round(df['price ($/MMBTU)'].ewm(span=60, min_periods=60).std(), 2)
         return df
     
     @classmethod
@@ -93,9 +93,9 @@ class EiaTransformation:
         
         Returns:
             pd.DataFrame: Returns modified dataframe '''
-        df['7day_rolling_average price ($/MMBTU)'] = df['price ($/MMBTU)'].rolling(window=7, min_periods=7).mean()
-        df['14day_rolling_average price ($/MMBTU)'] = df['price ($/MMBTU)'].rolling(window=14, min_periods=14).mean()
-        df['30day_rolling_average price ($/MMBTU)'] = df['price ($/MMBTU)'].rolling(window=30, min_periods=30).mean()
+        df['7day_rolling_average price ($/MMBTU)'] = round(df['price ($/MMBTU)'].rolling(window=7, min_periods=7).mean(), 2)
+        df['14day_rolling_average price ($/MMBTU)'] = round(df['price ($/MMBTU)'].rolling(window=14, min_periods=14).mean(), 2)
+        df['30day_rolling_average price ($/MMBTU)'] = round(df['price ($/MMBTU)'].rolling(window=30, min_periods=30).mean(), 2)
         return df
     
     @classmethod
@@ -107,9 +107,9 @@ class EiaTransformation:
         
         Returns:
             pd.DataFrame: Returns modified dataframe '''
-        df['7day_rolling_median price ($/MMBTU)'] = df['price ($/MMBTU)'].rolling(window=7, min_periods=7).median()
-        df['14day_rolling_median price ($/MMBTU)'] = df['price ($/MMBTU)'].rolling(window=14, min_periods=14).median()
-        df['30day_rolling_median price ($/MMBTU)'] = df['price ($/MMBTU)'].rolling(window=30, min_periods=30).median()
+        df['7day_rolling_median price ($/MMBTU)'] = round(df['price ($/MMBTU)'].rolling(window=7, min_periods=7).median(), 2)
+        df['14day_rolling_median price ($/MMBTU)'] = round(df['price ($/MMBTU)'].rolling(window=14, min_periods=14).median(), 2)
+        df['30day_rolling_median price ($/MMBTU)'] = round(df['price ($/MMBTU)'].rolling(window=30, min_periods=30).median(), 2)
         return df
     
     @classmethod
@@ -121,7 +121,7 @@ class EiaTransformation:
         
         Returns:
             pd.DataFrame: Returns modified dataframe '''
-        df['total_consumption_total_underground_storage_ratio'] = (df['residential_consumption'] + df['commercial_consumption']) / df['total_underground_storage']
+        df['total_consumption_total_underground_storage_ratio'] = round((df['residential_consumption'] + df['commercial_consumption']) / df['total_underground_storage'], 2)
         return df
 
 
