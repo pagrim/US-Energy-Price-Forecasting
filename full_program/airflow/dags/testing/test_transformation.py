@@ -99,6 +99,7 @@ class TestNoaaTransformation:
         'tavg': [0, 15, 17, 0, 13, 15, 17, 16, 16, 17, 17, 17, 16, 17, 30, -3, -1, 15, 6, 7, 0, 25, -10, -6, 22, -15, -10],
         'hdd': [18.33, 3.33, 1.33, 18.33, 5.33, 3.33, 1.33, 2.33, 2.33, 1.33, 1.33, 1.33, 2.33, 1.33, 0, 21.33, 19.33, 3.33, 12.33, 11.33, 18.33, 0, 28.33, 24.33, 0, 33.33, 28.33],
         'max_hdd': [18.33, 18.33, 18.33, 18.33, 18.33, 18.33, 2.33, 2.33, 2.33, 1.33, 1.33, 1.33, 2.33, 2.33, 2.33, 21.33, 21.33, 21.33, 18.33, 18.33, 18.33, 28.33, 28.33, 28.33, 33.33, 33.33, 33.33]}]
+        
         expected_df = pd.DataFrame(data)
         result_df = NoaaTransformation.maximum_hdd(df=df_noaa_feature_engineering_testing)
         pd.testing.assert_frame_equal(result_df, expected_df)
@@ -188,6 +189,58 @@ class TestNoaaTransformation:
         expected_df = pd.DataFrame(data)
         result_df = NoaaTransformation.min_and_max_average_temperature(df=df_noaa_feature_engineering_testing)
         pd.testing.assert_frame_equal(result_df, expected_df)
+    
+    def test_max_abs_tavg_diff(self, df_noaa_feature_engineering_testing):
+        '''
+        Tests max_abs_tavg_diff function of NoaaTransformation class
+        '''
+        data = [{'date': ['1999-01-05', '1999-01-05', '1999-01-05', '1999-01-06', '1999-01-06', '1999-01-06', '1999-01-07', '1999-01-07', '1999-01-07',
+        '2000-01-05', '2000-01-05', '2000-01-05', '2000-01-06', '2000-01-06', '2000-01-06', '2000-01-07', '2000-01-07', '2000-01-07', 
+        '2004-01-05', '2004-01-05', '2004-01-05', '2004-01-06', '2004-01-06', '2004-01-06', '2004-01-07', '2004-01-07', '2004-01-07'],
+        'state': ['Florida', 'Illinois', 'New York', 'Florida', 'Illinois', 'New York', 'Florida', 'Illinois', 'New York',
+        'Florida', 'Illinois', 'New York', 'Florida', 'Illinois', 'New York', 'Florida', 'Illinois', 'New York', 
+        'Florida', 'Illinois', 'New York', 'Florida', 'Illinois', 'New York', 'Florida', 'Illinois', 'New York'],
+        'city': ['Miami', 'Chicago', 'New York', 'Miami', 'Chicago', 'New York', 'Miami', 'Chicago', 'New York',
+        'Miami', 'Chicago', 'New York', 'Miami', 'Chicago', 'New York', 'Miami', 'Chicago', 'New York', 
+        'Miami', 'Chicago', 'New York', 'Miami', 'Chicago', 'New York', 'Miami', 'Chicago', 'New York'],
+        'wci': [10, 5, 1, 8, 7, 4, 2, 10, 4, 0, 2, 1, 3, 4, 2, 1, 5, 3, 1, 15, 8, 3, 17, 12, 4, 6, 7],
+        'snow': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 3, 0, 2, 1, 0, 6, 4, 2],
+        'tavg': [0, 15, 17, 0, 13, 15, 17, 16, 16, 17, 17, 17, 16, 17, 30, -3, -1, 15, 6, 7, 0, 25, -10, -6, 22, -15, -10],
+        'max_abs_tavg_diff': [None, None, None, 2, 2, 2, 17, 17, 17, 1, 1, 1, 13, 13, 13, 19, 19, 19, 15, 15, 15, 19, 19, 19, 5, 5, 5]}]
+        expected_df = pd.DataFrame(data)
+        result_df = NoaaTransformation.max_abs_tavg_diff(df=df_noaa_feature_engineering_testing)
+        pd.testing.assert_frame_equal(result_df, expected_df)
+    
+    def test_max_abs_tavg_diff_relative_daily_median(self, df_noaa_feature_engineering_testing):
+        '''
+        Tests max_abs_tavg_diff_relative_daily_median function of NoaaTransformation class
+        '''
+        data = [{'date': ['1999-01-05', '1999-01-05', '1999-01-05', '1999-01-06', '1999-01-06', '1999-01-06', '1999-01-07', '1999-01-07', '1999-01-07',
+        '2000-01-05', '2000-01-05', '2000-01-05', '2000-01-06', '2000-01-06', '2000-01-06', '2000-01-07', '2000-01-07', '2000-01-07', 
+        '2004-01-05', '2004-01-05', '2004-01-05', '2004-01-06', '2004-01-06', '2004-01-06', '2004-01-07', '2004-01-07', '2004-01-07'],
+        'state': ['Florida', 'Illinois', 'New York', 'Florida', 'Illinois', 'New York', 'Florida', 'Illinois', 'New York',
+        'Florida', 'Illinois', 'New York', 'Florida', 'Illinois', 'New York', 'Florida', 'Illinois', 'New York', 
+        'Florida', 'Illinois', 'New York', 'Florida', 'Illinois', 'New York', 'Florida', 'Illinois', 'New York'],
+        'city': ['Miami', 'Chicago', 'New York', 'Miami', 'Chicago', 'New York', 'Miami', 'Chicago', 'New York',
+        'Miami', 'Chicago', 'New York', 'Miami', 'Chicago', 'New York', 'Miami', 'Chicago', 'New York', 
+        'Miami', 'Chicago', 'New York', 'Miami', 'Chicago', 'New York', 'Miami', 'Chicago', 'New York'],
+        'wci': [10, 5, 1, 8, 7, 4, 2, 10, 4, 0, 2, 1, 3, 4, 2, 1, 5, 3, 1, 15, 8, 3, 17, 12, 4, 6, 7],
+        'snow': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 3, 0, 2, 1, 0, 6, 4, 2],
+        'tavg': [0, 15, 17, 0, 13, 15, 17, 16, 16, 17, 17, 17, 16, 17, 30, -3, -1, 15, 6, 7, 0, 25, -10, -6, 22, -15, -10],
+        'tavg_abs_diff_relative_to_daily_median': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}]
+        expected_df = pd.DataFrame(data)
+        result_df = NoaaTransformation.max_abs_tavg_diff_relative_to_daily_median(df=df_noaa_feature_engineering_testing)
+        pd.testing.assert_frame_equal(result_df, expected_df)
+    
+    
+
+    
+
+    
+
+
+
+
 
 
 

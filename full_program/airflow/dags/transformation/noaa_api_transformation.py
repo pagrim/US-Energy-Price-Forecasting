@@ -241,7 +241,7 @@ class NoaaTransformation:
         return df
     
     @classmethod
-    def max_abs_tavg_diff_relative_daily_median(cls, df: pd.DataFrame) -> pd.DataFrame:
+    def max_abs_tavg_diff_relative_to_daily_median(cls, df: pd.DataFrame) -> pd.DataFrame:
         '''
         Creates absolute value largest temperature difference relative to daily median across all states
 
