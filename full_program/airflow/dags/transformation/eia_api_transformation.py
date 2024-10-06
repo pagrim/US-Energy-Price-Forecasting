@@ -28,6 +28,7 @@ class EiaTransformation:
         ''' 
         Imputes null values for monthly variables with median calculated from 
         values up to 6 months prior and 6 months succeeding missing value
+        
         Args:
             df (pd.DataFrame): Natural gas prices df
         
@@ -47,6 +48,7 @@ class EiaTransformation:
     def natural_gas_prices_lag(cls, df: pd.DataFrame) -> pd.DataFrame:
         ''' 
         Creates lag variables for 1,2 and 3 days for natural gas prices
+        
         Args:
             df (pd.DataFrame): Natural gas prices df
         
@@ -61,6 +63,7 @@ class EiaTransformation:
     def heating_oil_to_natural_gas_price_ratio(cls, df: pd.DataFrame) -> pd.DataFrame:
         ''' 
         Creates a ratio of price of heating oil vs price of natural gas
+        
         Args:
             df (pd.DataFrame): Natural gas prices df
         
@@ -73,6 +76,7 @@ class EiaTransformation:
     def expotential_weighted_natural_gas_price_volatility(cls, df: pd.DataFrame) -> pd.DataFrame:
         ''' 
         Creates expotential weighted natural gas price volatility for 7, 14, 30 and 60 days
+        
         Args:
             df (pd.DataFrame): Natural gas prices df
         
@@ -88,6 +92,7 @@ class EiaTransformation:
     def rolling_average_natural_gas_price(cls, df: pd.DataFrame) -> pd.DataFrame:
         ''' 
         Creates rolling average of natural gas prices for 7, 14 and 30 days
+        
         Args:
             df (pd.DataFrame): Natural gas prices df
         
@@ -102,6 +107,7 @@ class EiaTransformation:
     def rolling_median_natural_gas_price(cls, df: pd.DataFrame) -> pd.DataFrame:
         ''' 
         Creates rolling median of natural gas prices for 7, 14 and 30 days
+        
         Args:
             df (pd.DataFrame): Natural gas prices df
         
@@ -116,6 +122,7 @@ class EiaTransformation:
     def total_consumption_to_total_underground_storage_ratio(cls, df: pd.DataFrame) -> pd.DataFrame:
         ''' 
         Creates total natural gas consumption to natural gas underground storage ratio
+        
         Args:
             df (pd.DataFrame): Natural gas prices df
         
@@ -123,6 +130,22 @@ class EiaTransformation:
             pd.DataFrame: Returns modified dataframe '''
         df['total_consumption_total_underground_storage_ratio'] = round((df['residential_consumption'] + df['commercial_consumption']) / df['total_underground_storage'], 2)
         return df
+
+    @classmethod
+    def is_december_or_january(cls, df: pd.DataFrame) -> pd.DataFrame:
+        '''
+        Creates is_dec_or_jan binary variable where 1 indicates a given date is in December or January
+        
+        Args:
+            df (pd.DataFrame): Natural gas prices df
+        
+        Returns:
+            pd.DataFrame: Returns modified dataframe
+        '''
+        df['is_dec_or_jan'] = (df.index.month == 12) | (df.index.month == 1)
+        df['is_dec_or_jan'] = df['is_dec_or_jan'].astype(int)
+        return df
+
 
 
     

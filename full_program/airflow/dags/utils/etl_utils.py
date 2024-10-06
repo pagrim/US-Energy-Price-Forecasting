@@ -98,16 +98,52 @@ class EtlUtils:
     
     @classmethod
     def pivot_columns(cls, df: pd.DataFrame, index: list, column: str, value: str) -> pd.DataFrame:
-        ''' Pivots columns in a given dataframe '''
+        ''' 
+        Pivots columns in a given dataframe 
+        
+        Args:
+            df (pd.DataFrame): Pandas dataframe where columns are going to be pivoted
+            index (list): Columns to index for pivot
+            column (str): Column to pivot value for
+            value (str): Value displayed for pivoted column
+        
+        Returns:
+            pd.DataFrame: Dataframe with pivoted columns
+        '''
         df = df.pivot(index=index, columns=column, values=value).reset_index()
         df.columns.name = None
         return df
     
     @classmethod
     def drop_null(cls, df: pd.DataFrame) -> pd.DataFrame:
-        ''' Drops null rows in a given dataframe '''
+        ''' 
+        Drops null rows in a given dataframe
+        
+        Args:
+          df (pd.DataFrame): Pandas dataframe where null rows are going to be dropped
+
+        Returns:
+            pd.DataFrame: Dataframe with null columns removed 
+        '''
         df = df.dropna()
         return df
+    
+    @classmethod
+    def set_date_index(cls, df: pd.DataFrame) -> pd.DataFrame:
+        ''' 
+        Sets date as index for given dataframe 
+        
+        Args:
+          df (pd.DataFrame): Pandas dataframe where date is going to be set as index
+
+        Returns:
+            pd.DataFrame: Dataframe with date as index
+        
+        '''
+        df['date'] = pd.to_datetime(df['date'])
+        df = df.set_index('date')
+        return df
+
     
 
 

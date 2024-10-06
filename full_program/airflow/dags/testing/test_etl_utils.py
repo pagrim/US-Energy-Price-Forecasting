@@ -77,6 +77,20 @@ class TestEtlUtils:
         expected_df = pd.DataFrame(data)
         result_df = EtlUtils.drop_null(df=df_etl_utils_testing)
         pd.testing.assert_frame_equal(result_df, expected_df)
+    
+    def test_date_index(self, df_etl_utils_testing):
+        '''
+        Tests set_date_index function of EtlUtils class
+        '''
+        expected_df = df_etl_utils_testing.set_index('date')
+        expected_index = pd.to_datetime(['1991-01-04', '1999-01-04', '1999-01-05', '1999-01-06', '2024-05-24'])
+        result_df = EtlUtils.set_date_index(df=df_etl_utils_testing)
+        result_index = result_df.index
+        pd.testing.assert_index_equal(result_index, expected_index)
+        pd.testing.assert_frame_equal(result_df, expected_df)
+    
+
+        
 
 
 
