@@ -212,7 +212,7 @@ class NoaaTransformation:
         Creates maximum and minimum average temperature for any given state for each date
 
         Args:
-            df (pd.DataFrame)
+            df (pd.DataFrame): Daily weather data df
 
         Returns:
             pd.DataFrame: Returns modified dataframe
@@ -228,7 +228,7 @@ class NoaaTransformation:
         Creates absolute largest day-on-day average temperature movement across all states
 
         Args:
-            df (pd.DataFrame)
+            df (pd.DataFrame): Daily weather data df
         
         Returns:
             pd.DataFrame: Returns modified dataframe
@@ -246,7 +246,7 @@ class NoaaTransformation:
         Creates absolute value largest temperature difference relative to daily median across all states
 
         Args:
-            df(pd.DataFrame)
+            df(pd.DataFrame): Daily weather data df
         
         Returns:
             pd.DataFrame: Returns modified dataframe

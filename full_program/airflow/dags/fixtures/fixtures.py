@@ -117,7 +117,7 @@ def mock_metadata_response():
     return response_json
 
 @pytest.fixture
-def df_etl_utils_testing():
+def df_etl_transforms_testing():
     ''' Dataframe to be used for testing of EtlUtils class '''
     data = [{'date': '1999-01-04', 'datatype': 'AWND', 'station': 'GHCND:USW00094847', 'value': 4.3, 'city': 'Detroit', 'state': 'Michigan'},
     {'date': '1999-01-04', 'datatype': 'AWND', 'station': 'GHCND:USW00094847', 'value': 4.3, 'city': 'Detroit', 'state': 'Michigan'},

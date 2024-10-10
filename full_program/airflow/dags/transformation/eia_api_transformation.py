@@ -33,7 +33,8 @@ class EiaTransformation:
             df (pd.DataFrame): Natural gas prices df
         
         Returns:
-            pd.DataFrame: Returns modified dataframe  '''
+            pd.DataFrame: Returns modified dataframe  
+        '''
         for column in df.columns:
             if df[column].isnull.any():
                 for index, row in df.iterrows():
@@ -42,6 +43,21 @@ class EiaTransformation:
                         end_index = min(index + 7, len(df))
                         median_value = round(df[column].iloc[start_index : end_index].median(), 2)
                         df.at[index, column] = median_value
+        return df
+    
+    @classmethod
+    def convert_price_to_float(cls, df: pd.DataFrame, column: str) -> pd.DataFrame:
+        '''
+        Converts price column from non-float format to floating format
+
+        Args:
+            df (pd.DataFrame): Natural gas / heating oil prices df
+            column (str): Name of price column to be converted to float format
+        
+        Returns:
+            pd.DataFrame: Returns modified dataframe
+        '''
+        df[column] = pd.to_numeric(df[column])
         return df
 
     @classmethod
@@ -145,6 +161,7 @@ class EiaTransformation:
         df['is_dec_or_jan'] = (df.index.month == 12) | (df.index.month == 1)
         df['is_dec_or_jan'] = df['is_dec_or_jan'].astype(int)
         return df
+
 
 
 

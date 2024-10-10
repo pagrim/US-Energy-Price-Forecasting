@@ -419,6 +419,8 @@ class TestEiaTransformation:
         expected_df = pd.DataFrame(data)
         result_df = EiaTransformation.total_consumption_to_total_underground_storage_ratio(df=df_eia_feature_engineering_testing)
         pd.testing.assert_frame_equal(result_df, expected_df)
+    
+    
 
     
 
