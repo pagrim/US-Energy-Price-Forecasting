@@ -3405,3 +3405,6 @@ File Path                                    PID    Runtime      # DAGs    # Err
 [2024-10-10T11:44:56.780+0000] {manager.py:763} INFO - There are 0 files in /opt/airflow/dags
 [2024-10-10T11:49:57.119+0000] {manager.py:760} INFO - Searching for files in /opt/airflow/dags
 [2024-10-10T11:49:57.185+0000] {manager.py:763} INFO - There are 0 files in /opt/airflow/dags
+[2024-10-10T11:54:57.558+0000] {manager.py:760} INFO - Searching for files in /opt/airflow/dags
+[2024-10-10T11:54:57.630+0000] {manager.py:763} INFO - There are 0 files in /opt/airflow/dags
+[2024-10-10T11:57:45.331+0000] {manager.py:470} INFO - Exiting gracefully upon receiving signal 15
