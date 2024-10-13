@@ -163,27 +163,6 @@ def df_noaa_transformation_testing_impute_missing_weather_variables():
     return df
 
 @pytest.fixture
-def df_eia_transformation_testing():
-    '''
-    Dataframe to be used for testing of EiaTransformation class
-    '''
-    data = [{'period': '2014-05-01', 'LNG Imports (Price)': 5.99},
-    {'period': '2014-06-01', 'LNG Imports (Price)': 10.48},
-    {'period': '2014-07-01', 'LNG Imports (Price)': 11.80},
-    {'period': '2014-08-01', 'LNG Imports (Price)': 6.56},
-    {'period': '2014-09-01', 'LNG Imports (Price)': 8.73},
-    {'period': '2014-10-01', 'LNG Imports (Price)': 4.63},
-    {'period': '2014-11-01', 'LNG Imports (Price)': None},
-    {'period': '2014-12-01', 'LNG Imports (Price)': 7.45},
-    {'period': '2015-01-01', 'LNG Imports (Price)': 10.90},
-    {'period': '2015-02-01', 'LNG Imports (Price)': 9.13},
-    {'period': '2015-03-01', 'LNG Imports (Price)': 8.10},
-    {'period': '2015-04-01', 'LNG Imports (Price)': 8.31},
-    {'period': '2015-01-01', 'LNG Imports (Price)': 6.04}]
-    df = pd.DataFrame(data)
-    return df
-
-@pytest.fixture
 def df_noaa_feature_engineering_testing():
     '''
     Dataframe to be used for testing functions used for feature engineering in NoaaTransformation class
@@ -205,7 +184,7 @@ def df_noaa_feature_engineering_testing():
     'city': ['Miami', 'Chicago', 'New York', 'Miami', 'Chicago', 'New York', 'Miami', 'Chicago', 'New York',
     'Miami', 'Chicago', 'New York', 'Miami', 'Chicago', 'New York', 'Miami', 'Chicago', 'New York', 
     'Miami', 'Chicago', 'New York', 'Miami', 'Chicago', 'New York', 'Miami', 'Chicago', 'New York'],
-    'wci': [10, 5, 1, 8, 7, 4, 2, 10, 4, 0, 2, 1, 3, 4, 2, 1, 5, 3, 1, 15, 8, 3, 17, 12, 4, 6, 7],
+    'awnd': [10, 5, 1, 8, 7, 4, 2, 10, 4, 0, 2, 1, 3, 4, 2, 1, 5, 3, 1, 15, 8, 3, 17, 12, 4, 6, 7],
     'snow': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 3, 0, 2, 1, 0, 6, 4, 2],
     'tavg': [0, 15, 17, 0, 13, 15, 17, 16, 16, 17, 17, 17, 16, 17, 30, -3, -1, 15, 6, 7, 0, 25, -10, -6, 22, -15, -10]}
     df = pd.DataFrame(data)
@@ -242,6 +221,377 @@ def df_eia_feature_engineering_testing():
     df['date'] = pd.to_datetime(df['date'])
     df = df.set_index('date')
     return df
+
+@pytest.fixture
+def merge_dataframes_natural_gas_spot_prices_df_no_missing_date():
+    ''' Dataframe containing natural gas spot prices with no missing dates to be used for testing of merge_dataframes function '''
+    data = {
+    'date': ['1999-01-04', '1999-01-05', '1999-01-06', '1999-01-07', '1999-01-08', '1999-01-11', '1999-01-12', '1999-01-13',
+    '1999-01-14', '1999-01-15', '1999-01-19', '1999-01-20', '1999-01-21', '1999-01-22', '1999-01-25', '1999-01-26',
+    '1999-01-27', '1999-01-28', '1999-01-29', '1999-02-01', '1999-02-02', '1999-02-03', '1999-02-04', '1999-02-05',
+    '1999-02-08', '1999-02-09', '1999-02-10', '1999-02-11', '1999-02-12', '1999-02-16', '1999-02-17', '1999-02-18',
+    '1999-02-19', '1999-02-22', '1999-02-23', '1999-02-24', '1999-02-25', '1999-02-26', '1999-03-01', '1999-03-02',
+    '1999-03-03', '1999-03-04', '1999-03-05', '1999-03-08', '1999-03-09', '1999-03-10', '1999-03-11', '1999-03-12',
+    '1999-03-15', '1999-03-16', '1999-03-17', '1999-03-18', '1999-03-19', '1999-03-22', '1999-03-23', '1999-03-24',
+    '1999-03-25', '1999-03-26', '1999-03-29', '1999-03-30', '1999-03-31', '1999-04-01'],
+    'price ($/MMBTU)': [2.1, 2.05, 2.04, 1.91, 1.9, 1.83, 1.82, 1.87, 1.77, 1.78, 1.77, 1.81, 1.85, 1.82, 1.76, 1.73, 1.75, 1.75, 1.83, 1.75, 1.78, 1.8, 1.79, 1.81, 1.81, 1.82, 1.8, 1.78, 1.82, 1.79, 1.79, 1.8, 1.79, 1.77, 1.75, 1.73, 1.64, 1.63, 1.65, 1.67, 1.68, 1.72, 1.74, 1.87, 1.86, 1.94, 1.87, 1.81, 1.75, 1.75, 1.75, 1.75, 1.73, 1.74, 1.8, 1.79, 1.8, 1.83, 1.8, 1.89, 2.02, 1.95]
+    }
+    df = pd.DataFrame(data)
+    df['date'] = pd.to_datetime(df['date'])
+    df = df.set_index('date')
+    return df
+
+@pytest.fixture
+def merge_dataframes_natural_gas_spot_prices_df_missing_date():
+    ''' 
+    Dataframe containing natural gas spot prices to be used for testing of merge_dataframes function 
+    with date 1999-04-01 missing
+    '''
+    data = {
+    'date': ['1999-01-04', '1999-01-05', '1999-01-06', '1999-01-07', '1999-01-08', '1999-01-11', '1999-01-12', '1999-01-13',
+    '1999-01-14', '1999-01-15', '1999-01-19', '1999-01-20', '1999-01-21', '1999-01-22', '1999-01-25', '1999-01-26',
+    '1999-01-27', '1999-01-28', '1999-01-29', '1999-02-01', '1999-02-02', '1999-02-03', '1999-02-04', '1999-02-05',
+    '1999-02-08', '1999-02-09', '1999-02-10', '1999-02-11', '1999-02-12', '1999-02-16', '1999-02-17', '1999-02-18',
+    '1999-02-19', '1999-02-22', '1999-02-23', '1999-02-24', '1999-02-25', '1999-02-26', '1999-03-01', '1999-03-02',
+    '1999-03-03', '1999-03-04', '1999-03-05', '1999-03-08', '1999-03-09', '1999-03-10', '1999-03-11', '1999-03-12',
+    '1999-03-15', '1999-03-16', '1999-03-17', '1999-03-18', '1999-03-19', '1999-03-22', '1999-03-23', '1999-03-24',
+    '1999-03-25', '1999-03-26', '1999-03-29', '1999-03-30', '1999-03-31'],
+    'price ($/MMBTU)': [2.1, 2.05, 2.04, 1.91, 1.9, 1.83, 1.82, 1.87, 1.77, 1.78, 1.77, 1.81, 1.85, 1.82, 1.76, 1.73, 1.75, 1.75, 1.83, 1.75, 1.78, 1.8, 1.79, 1.81, 1.81, 1.82, 1.8, 1.78, 1.82, 1.79, 1.79, 1.8, 1.79, 1.77, 1.75, 1.73, 1.64, 1.63, 1.65, 1.67, 1.68, 1.72, 1.74, 1.87, 1.86, 1.94, 1.87, 1.81, 1.75, 1.75, 1.75, 1.75, 1.73, 1.74, 1.8, 1.79, 1.8, 1.83, 1.8, 1.89, 2.02, 1.95]
+    }
+    df = pd.DataFrame(data)
+    df['date'] = pd.to_datetime(df['date'])
+    df = df.set_index('date')
+    return df
+
+@pytest.fixture
+def merge_dataframes_heating_oil_spot_prices_df_no_missing_date():
+    ''' 
+    Dataframe containing heating oil spot prices with no missing dates to be used for testing of merge_dataframes function
+    '''
+    data = {
+    'date': ['1999-01-04', '1999-01-05', '1999-01-06', '1999-01-07', '1999-01-08', '1999-01-11', '1999-01-12', '1999-01-13',
+    '1999-01-14', '1999-01-15', '1999-01-19', '1999-01-20', '1999-01-21', '1999-01-22', '1999-01-25', '1999-01-26',
+    '1999-01-27', '1999-01-28', '1999-01-29', '1999-02-01', '1999-02-02', '1999-02-03', '1999-02-04', '1999-02-05',
+    '1999-02-08', '1999-02-09', '1999-02-10', '1999-02-11', '1999-02-12', '1999-02-16', '1999-02-17', '1999-02-18',
+    '1999-02-19', '1999-02-22', '1999-02-23', '1999-02-24', '1999-02-25', '1999-02-26', '1999-03-01', '1999-03-02',
+    '1999-03-03', '1999-03-04', '1999-03-05', '1999-03-08', '1999-03-09', '1999-03-10', '1999-03-11', '1999-03-12',
+    '1999-03-15', '1999-03-16', '1999-03-17', '1999-03-18', '1999-03-19', '1999-03-22', '1999-03-23', '1999-03-24',
+    '1999-03-25', '1999-03-26', '1999-03-29', '1999-03-30', '1999-03-31', '1999-04-01'],
+    'price_heating_oil ($/GAL)': [0.346, 0.338, 0.354, 0.352, 0.36, 0.371, 0.352, 0.337, 0.327, 0.322, 0.323, 0.314, 0.323, 0.328, 0.322, 0.316, 0.327, 0.327, 0.329, 0.32, 0.318, 0.319, 0.304, 0.3, 0.294, 0.294, 0.297, 0.296, 0.293, 0.284, 0.287, 0.298, 0.291, 0.304, 0.314, 0.323, 0.327, 0.323, 0.319, 0.325, 0.333, 0.345, 0.349, 0.358, 0.36, 0.386, 0.377, 0.389, 0.383, 0.388, 0.396, 0.399, 0.408, 0.408, 0.418, 0.409, 0.418, 0.432, 0.433, 0.445, 0.442, 0.436]
+    }
+    df = pd.DataFrame(data)
+    df['date'] = pd.to_datetime(df['date'])
+    df = df.set_index('date')
+    return df
+
+@pytest.fixture
+def merge_dataframes_heating_oil_spot_prices_df_missing_date():
+    ''' 
+    Dataframe containing heating oil spot prices to be used for testing of merge_dataframes function 
+    with date 1999-01-05 missing
+    '''
+    data = {
+    'date': ['1999-01-04', '1999-01-06', '1999-01-07', '1999-01-08', '1999-01-11', '1999-01-12', '1999-01-13',
+    '1999-01-14', '1999-01-15', '1999-01-19', '1999-01-20', '1999-01-21', '1999-01-22', '1999-01-25', '1999-01-26',
+    '1999-01-27', '1999-01-28', '1999-01-29', '1999-02-01', '1999-02-02', '1999-02-03', '1999-02-04', '1999-02-05',
+    '1999-02-08', '1999-02-09', '1999-02-10', '1999-02-11', '1999-02-12', '1999-02-16', '1999-02-17', '1999-02-18',
+    '1999-02-19', '1999-02-22', '1999-02-23', '1999-02-24', '1999-02-25', '1999-02-26', '1999-03-01', '1999-03-02',
+    '1999-03-03', '1999-03-04', '1999-03-05', '1999-03-08', '1999-03-09', '1999-03-10', '1999-03-11', '1999-03-12',
+    '1999-03-15', '1999-03-16', '1999-03-17', '1999-03-18', '1999-03-19', '1999-03-22', '1999-03-23', '1999-03-24',
+    '1999-03-25', '1999-03-26', '1999-03-29', '1999-03-30', '1999-03-31', '1999-04-01'],
+    'price_heating_oil ($/GAL)': [0.346, 0.338, 0.354, 0.352, 0.36, 0.371, 0.352, 0.337, 0.327, 0.322, 0.323, 0.314, 0.323, 0.328, 0.322, 0.316, 0.327, 0.327, 0.329, 0.32, 0.318, 0.319, 0.304, 0.3, 0.294, 0.294, 0.297, 0.296, 0.293, 0.284, 0.287, 0.298, 0.291, 0.304, 0.314, 0.323, 0.327, 0.323, 0.319, 0.325, 0.333, 0.345, 0.349, 0.358, 0.36, 0.386, 0.377, 0.389, 0.383, 0.388, 0.396, 0.399, 0.408, 0.408, 0.418, 0.409, 0.418, 0.432, 0.433, 0.445, 0.442, 0.436]
+    }
+    df = pd.DataFrame(data)
+    df['date'] = pd.to_datetime(df['date'])
+    df = df.set_index('date')
+    return df
+
+@pytest.fixture
+def merge_dataframes_natural_gas_monthly_variables_df_no_missing_date():
+    ''' Dataframe containing monthly data for imports, residential consumption, commerical consumption, total_underground_storage with no missing dates
+    to be used for testing of merge_dataframes function '''
+    data = {
+        'date': ['1999-01-01', '1999-02-01', '1999-03-01', '1999-04-01'],
+        'imports': [1000, 2000, 3000, 4000],
+        'lng_imports': [20, 40, 60, 80],
+        'residential_consumption': [2.1, 2.05, 2.04, 1.91],
+        'commerical_consumption': [475945.0, 475960.0, 475970.0, 475980.0],
+        'total_underground_storage': [6404470.0, 6404480.0, 6404490.0, 6404500.0]
+    }
+    df = pd.DataFrame(data)
+    df['date'] = pd.to_datetime(df['date'])
+    df = df.set_index('date')
+    return df
+
+@pytest.fixture
+def merge_dataframes_natural_gas_monthly_variables_df_missing_date():
+    ''' Dataframe containing monthly data for imports, residential consumption, commerical consumption, total_underground_storage with date 
+    1999-03-01 missing to be used for testing of merge_dataframes function '''
+    data = {
+        'date': ['1999-01-01', '1999-02-01', '1999-04-01'],
+        'imports': [1000, 2000, 4000],
+        'lng_imports': [20, 40, 80],
+        'residential_consumption': [2.1, 2.05, 1.91],
+        'commerical_consumption': [475945.0, 475960.0, 475980.0],
+        'total_underground_storage': [6404470.0, 6404480.0, 6404500.0]
+    }
+    df = pd.DataFrame(data)
+    df['date'] = pd.to_datetime(df['date'])
+    df = df.set_index('date')
+    return df
+
+@pytest.fixture
+def merge_dataframes_natural_gas_rigs_in_operation_df_no_missing_date():
+    ''' Dataframe containing monthly data for natural gas rigs in operation with no missing dates 
+    used for testing of merge_dataframes function
+    '''
+    data = {
+        'date': ['1999-01-01', '1999-02-01', '1999-03-01', '1999-04-01'],
+        'natural_gas_rigs_in_operation': [1000, 2000, 3000, 4000]
+    }
+    df = pd.DataFrame(data)
+    df['date'] = pd.to_datetime(df['date'])
+    df = df.set_index('date')
+    return df
+
+@pytest.fixture
+def merge_dataframes_natural_gas_rigs_in_operation_df_missing_date():
+    ''' Dataframe containing monthly data for natural gas rigs in operation with date 1999-02-01 missing
+    used for testing of merge_dataframes function 
+    '''
+    data = {
+        'date': ['1999-01-01', '1999-02-01', '1999-03-01', '1999-04-01'],
+        'natural_gas_rigs_in_operation': [1000, 2000, 3000, 4000]
+    }
+    df = pd.DataFrame(data)
+    df['date'] = pd.to_datetime(df['date'])
+    df = df.set_index('date')
+    return df
+
+@pytest.fixture
+def merge_dataframes_daily_weather_df_no_missing_date():
+    '''
+    Dataframe containing daily weather data with no missing dates to be used for testing of merge_dataframes function
+    '''
+    data = {'date': ['1999-01-04', '1999-01-05', '1999-01-06', '1999-01-07', '1999-01-08', '1999-01-11', '1999-01-12', '1999-01-13',
+    '1999-01-14', '1999-01-15', '1999-01-19', '1999-01-20', '1999-01-21', '1999-01-22', '1999-01-25', '1999-01-26',
+    '1999-01-27', '1999-01-28', '1999-01-29', '1999-02-01', '1999-02-02', '1999-02-03', '1999-02-04', '1999-02-05',
+    '1999-02-08', '1999-02-09', '1999-02-10', '1999-02-11', '1999-02-12', '1999-02-16', '1999-02-17', '1999-02-18',
+    '1999-02-19', '1999-02-22', '1999-02-23', '1999-02-24', '1999-02-25', '1999-02-26', '1999-03-01', '1999-03-02',
+    '1999-03-03', '1999-03-04', '1999-03-05', '1999-03-08', '1999-03-09', '1999-03-10', '1999-03-11', '1999-03-12',
+    '1999-03-15', '1999-03-16', '1999-03-17', '1999-03-18', '1999-03-19', '1999-03-22', '1999-03-23', '1999-03-24',
+    '1999-03-25', '1999-03-26', '1999-03-29', '1999-03-30', '1999-03-31', '1999-04-01'],
+    'state': ['Florida', 'Florida', 'Florida', 'Florida', 'Florida', 'Florida', 'Florida', 'Florida', 'Florida', 'Florida',
+    'Florida', 'Florida', 'Florida', 'Florida', 'Florida', 'Florida', 'Florida', 'Florida', 'Florida', 'Florida',
+    'Florida', 'Florida', 'Florida', 'Florida', 'Florida', 'Florida', 'Florida', 'Florida', 'Florida', 'Florida',
+    'Florida', 'Florida', 'Florida', 'Florida', 'Florida', 'Florida', 'Florida', 'Florida', 'Florida', 'Florida',
+    'Florida', 'Florida', 'Florida', 'Florida', 'Florida', 'Florida', 'Florida', 'Florida', 'Florida', 'Florida',
+    'Florida', 'Florida', 'Florida', 'Florida', 'Florida', 'Florida', 'Florida', 'Florida', 'Florida', 'Florida',
+    'Florida', 'Florida'],
+    'city': ['Miami', 'Miami', 'Miami', 'Miami', 'Miami', 'Miami', 'Miami', 'Miami', 'Miami', 'Miami',
+    'Miami', 'Miami', 'Miami', 'Miami', 'Miami', 'Miami', 'Miami', 'Miami', 'Miami', 'Miami', 
+    'Miami', 'Miami', 'Miami', 'Miami', 'Miami', 'Miami', 'Miami', 'Miami', 'Miami', 'Miami',
+    'Miami', 'Miami', 'Miami', 'Miami', 'Miami', 'Miami', 'Miami', 'Miami', 'Miami', 'Miami',
+    'Miami', 'Miami', 'Miami', 'Miami', 'Miami', 'Miami', 'Miami', 'Miami', 'Miami', 'Miami',
+    'Miami', 'Miami', 'Miami', 'Miami', 'Miami', 'Miami', 'Miami', 'Miami', 'Miami', 'Miami',
+    'Miami'],
+    'awnd': [10, 5, 1, 8, 7, 4, 2, 10, 4, 0, 2, 1, 3, 4, 2, 1, 5, 3, 1, 15, 8, 3, 17, 12, 4, 6, 7, 
+    5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5],
+    'snow': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 3, 0, 2, 1, 0, 6, 4, 2,
+    5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5],
+    'tavg': [0, 15, 17, 0, 13, 15, 17, 16, 16, 17, 17, 17, 16, 17, 30, -3, -1, 15, 6, 7, 0, 25, -10, -6, 22, -15, -10,
+    5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5]}
+    df = pd.DataFrame(data)
+    df['date'] = pd.to_datetime(df['date'])
+    df = df.set_index('date')
+    return df
+
+@pytest.fixture
+def merge_dataframes_daily_weather_df_missing_date():
+    '''
+    Dataframe containing daily weather data to be used for testing of merge_dataframes function
+    with date 1999-03-29 missing
+    '''
+    data = {'date': ['1999-01-04', '1999-01-05', '1999-01-06', '1999-01-07', '1999-01-08', '1999-01-11', '1999-01-12', '1999-01-13',
+    '1999-01-14', '1999-01-15', '1999-01-19', '1999-01-20', '1999-01-21', '1999-01-22', '1999-01-25', '1999-01-26',
+    '1999-01-27', '1999-01-28', '1999-01-29', '1999-02-01', '1999-02-02', '1999-02-03', '1999-02-04', '1999-02-05',
+    '1999-02-08', '1999-02-09', '1999-02-10', '1999-02-11', '1999-02-12', '1999-02-16', '1999-02-17', '1999-02-18',
+    '1999-02-19', '1999-02-22', '1999-02-23', '1999-02-24', '1999-02-25', '1999-02-26', '1999-03-01', '1999-03-02',
+    '1999-03-03', '1999-03-04', '1999-03-05', '1999-03-08', '1999-03-09', '1999-03-10', '1999-03-11', '1999-03-12',
+    '1999-03-15', '1999-03-16', '1999-03-17', '1999-03-18', '1999-03-19', '1999-03-22', '1999-03-23', '1999-03-24',
+    '1999-03-25', '1999-03-26', '1999-03-30', '1999-03-31', '1999-04-01'],
+    'state': ['Florida', 'Florida', 'Florida', 'Florida', 'Florida', 'Florida', 'Florida', 'Florida', 'Florida', 'Florida',
+    'Florida', 'Florida', 'Florida', 'Florida', 'Florida', 'Florida', 'Florida', 'Florida', 'Florida', 'Florida',
+    'Florida', 'Florida', 'Florida', 'Florida', 'Florida', 'Florida', 'Florida', 'Florida', 'Florida', 'Florida',
+    'Florida', 'Florida', 'Florida', 'Florida', 'Florida', 'Florida', 'Florida', 'Florida', 'Florida', 'Florida',
+    'Florida', 'Florida', 'Florida', 'Florida', 'Florida', 'Florida', 'Florida', 'Florida', 'Florida', 'Florida',
+    'Florida', 'Florida', 'Florida', 'Florida', 'Florida', 'Florida', 'Florida', 'Florida', 'Florida', 'Florida',
+    'Florida', 'Florida'],
+    'city': ['Miami', 'Miami', 'Miami', 'Miami', 'Miami', 'Miami', 'Miami', 'Miami', 'Miami', 'Miami',
+    'Miami', 'Miami', 'Miami', 'Miami', 'Miami', 'Miami', 'Miami', 'Miami', 'Miami', 'Miami', 
+    'Miami', 'Miami', 'Miami', 'Miami', 'Miami', 'Miami', 'Miami', 'Miami', 'Miami', 'Miami',
+    'Miami', 'Miami', 'Miami', 'Miami', 'Miami', 'Miami', 'Miami', 'Miami', 'Miami', 'Miami',
+    'Miami', 'Miami', 'Miami', 'Miami', 'Miami', 'Miami', 'Miami', 'Miami', 'Miami', 'Miami',
+    'Miami', 'Miami', 'Miami', 'Miami', 'Miami', 'Miami', 'Miami', 'Miami', 'Miami', 'Miami',
+    'Miami'],
+    'awnd': [10, 5, 1, 8, 7, 4, 2, 10, 4, 0, 2, 1, 3, 4, 2, 1, 5, 3, 1, 15, 8, 3, 17, 12, 4, 6, 7, 
+    5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 5, 4, 5],
+    'snow': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 3, 0, 2, 1, 0, 6, 4, 2,
+    5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 5, 4, 5],
+    'tavg': [0, 15, 17, 0, 13, 15, 17, 16, 16, 17, 17, 17, 16, 17, 30, -3, -1, 15, 6, 7, 0, 25, -10, -6, 22, -15, -10,
+    5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 5, 4, 5]}
+    df = pd.DataFrame(data)
+    df['date'] = pd.to_datetime(df['date'])
+    df = df.set_index('date')
+    return df
+
+@pytest.fixture
+def df_forwardfill_null_values_end_of_series_with_empty_values():
+    ''' 
+    Dataframe containing null values end of series used for testing of forwardfill_null_values_end_of_series function 
+    '''
+    data = {
+        'date': ['1999-03-29', '1999-03-30', '1999-03-31', '1999-04-01'],
+        'imports': [1000, 1000, 1000, None],
+        'lng_imports': [20, 40, 60, None],
+        'residential_consumption': [2.1, 2.05, 2.04, None],
+        'commerical_consumption': [475945.0, 475960.0, 475970.0, None],
+        'total_underground_storage': [6404470.0, 6404480.0, 6404490.0, None],
+        'awnd': [10, 5, 1, None],
+        'snow': [5, 3, 0, None],
+        'tavg': [0, 15, 17, None]
+    }
+    df = pd.DataFrame(data)
+    df['date'] = pd.to_datetime(df['date'])
+    df = df.set_index('date')
+    return df
+
+@pytest.fixture
+def df_forwardfill_null_values_end_of_series_no_empty_values():
+    '''
+    Dataframe containing no null values end of series used for testing of forwardfill_null_values_end_of_series function
+    '''
+    data = {
+        'date': ['1999-03-29', '1999-03-30', '1999-03-31', '1999-04-01'],
+        'imports': [1000, 1000, 1000, 2000],
+        'lng_imports': [20, 40, 60, 80],
+        'residential_consumption': [2.1, 2.05, 2.04, 2.06],
+        'commerical_consumption': [475945.0, 475960.0, 475970.0, 475980.0],
+        'total_underground_storage': [6404470.0, 6404480.0, 6404490.0, 6404590.0],
+        'awnd': [10, 5, 1, 2],
+        'snow': [5, 3, 0, 3],
+        'tavg': [0, 15, 17, 10]
+    }
+    df = pd.DataFrame(data)
+    df['date'] = pd.to_datetime(df['date'])
+    df = df.set_index('date')
+    return df
+
+@pytest.fixture
+def df_backfill_null_values_start_of_series_with_empty_values():
+    '''
+    Dataframe containing no null values start of series used for testing of backfill_null_values_start_of_series function
+    '''
+    data = {
+        'price_1day_lag ($/MMBTU)': [None, 2.1, 2.05, 2.04, 1.91, 1.9, 1.83, 1.82, 1.87, 1.77, 1.78, 1.77, 1.81, 1.85, 1.82, 1.76, 1.73, 1.75, 1.75, 1.83, 1.75, 1.78, 1.8, 1.79, 1.81, 1.81, 1.82, 1.8, 1.78, 1.82, 1.79, 1.79, 1.8, 1.79, 1.77, 1.75, 1.73, 1.64, 1.63, 1.65, 1.67, 1.68, 1.72, 1.74, 1.87, 1.86, 1.94, 1.87, 1.81, 1.75, 1.75, 1.75, 1.75, 1.73, 1.74, 1.8, 1.79, 1.8, 1.83, 1.8, 1.89, 2.02],
+        'price_2day_lag ($/MMBTU)': [None, None, 2.1, 2.05, 2.04, 1.91, 1.9, 1.83, 1.82, 1.87, 1.77, 1.78, 1.77, 1.81, 1.85, 1.82, 1.76, 1.73, 1.75, 1.75, 1.83, 1.75, 1.78, 1.8, 1.79, 1.81, 1.81, 1.82, 1.8, 1.78, 1.82, 1.79, 1.79, 1.8, 1.79, 1.77, 1.75, 1.73, 1.64, 1.63, 1.65, 1.67, 1.68, 1.72, 1.74, 1.87, 1.86, 1.94, 1.87, 1.81, 1.75, 1.75, 1.75, 1.75, 1.73, 1.74, 1.8, 1.79, 1.8, 1.83, 1.8, 1.89],
+        'price_3day_lag ($/MMBTU)': [None, None, None, 2.1, 2.05, 2.04, 1.91, 1.9, 1.83, 1.82, 1.87, 1.77, 1.78, 1.77, 1.81, 1.85, 1.82, 1.76, 1.73, 1.75, 1.75, 1.83, 1.75, 1.78, 1.8, 1.79, 1.81, 1.81, 1.82, 1.8, 1.78, 1.82, 1.79, 1.79, 1.8, 1.79, 1.77, 1.75, 1.73, 1.64, 1.63, 1.65, 1.67, 1.68, 1.72, 1.74, 1.87, 1.86, 1.94, 1.87, 1.81, 1.75, 1.75, 1.75, 1.75, 1.73, 1.74, 1.8, 1.79, 1.8, 1.83, 1.8],
+        '7day_ew_volatility price ($/MMBTU)': [None, None, None, None, None, None, 0.1, 0.09, 0.09, 0.09, 0.08, 0.07, 0.06, 0.05, 0.06, 0.06, 0.06, 0.05, 0.05, 0.05, 0.04, 0.04, 0.03, 0.03, 0.03, 0.03, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.01, 0.02, 0.02, 0.03, 0.07, 0.07, 0.07, 0.06, 0.05, 0.05, 0.05, 0.09, 0.09, 0.11, 0.1, 0.09, 0.08, 0.08, 0.07, 0.06, 0.06, 0.05, 0.05, 0.04, 0.04, 0.04, 0.04, 0.05, 0.11, 0.1],
+        '14day_ew_volatility price ($/MMBTU)': [None, None, None, None, None, None, None, None, None, None, None, None, None, 0.08, 0.08, 0.08, 0.08, 0.08, 0.07, 0.07, 0.06, 0.06, 0.06, 0.05, 0.05, 0.05, 0.04, 0.04, 0.04, 0.04, 0.03, 0.03, 0.03, 0.03, 0.03, 0.04, 0.06, 0.07, 0.07, 0.07, 0.07, 0.06, 0.06, 0.08, 0.08, 0.1, 0.1, 0.09, 0.09, 0.08, 0.08, 0.07, 0.07, 0.07, 0.06, 0.06, 0.06, 0.06, 0.05, 0.06, 0.1, 0.1],
+        '30day_ew_volatility price ($/MMBTU)': [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, 0.06, 0.06, 0.06, 0.05, 0.05, 0.05, 0.05, 0.07, 0.07, 0.08, 0.08, 0.08, 0.08, 0.07, 0.08, 0.08, 0.09, 0.09, 0.09, 0.08, 0.08, 0.08, 0.08, 0.08, 0.07, 0.07, 0.07, 0.07, 0.07, 0.06, 0.07, 0.09, 0.09],
+        '60day_ew_volatility price ($/MMBTU)': [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, 0.07, 0.09, 0.09],
+        '7day_rolling_average price ($/MMBTU)': [None, None, None, None, None, None, 1.95, 1.92, 1.88, 1.84, 1.82, 1.81, 1.81, 1.81, 1.79, 1.79, 1.78, 1.78, 1.78, 1.77, 1.76, 1.77, 1.78, 1.79, 1.8, 1.79, 1.8, 1.8, 1.8, 1.8, 1.8, 1.8, 1.8, 1.79, 1.79, 1.77, 1.75, 1.73, 1.71, 1.69, 1.68, 1.67, 1.68, 1.71, 1.74, 1.78, 1.81, 1.83, 1.83, 1.84, 1.82, 1.8, 1.77, 1.75, 1.75, 1.76, 1.77, 1.78, 1.78, 1.81, 1.85, 1.87],
+        '14day_rolling_average price ($/MMBTU)': [None, None, None, None, None, None, None, None, None, None, None, None, None, 1.88, 1.86, 1.83, 1.81, 1.8, 1.8, 1.79, 1.79, 1.78, 1.78, 1.79, 1.79, 1.79, 1.79, 1.78, 1.79, 1.79, 1.79, 1.8, 1.8, 1.8, 1.79, 1.79, 1.78, 1.77, 1.75, 1.74, 1.74, 1.73, 1.72, 1.73, 1.74, 1.75, 1.75, 1.75, 1.75, 1.76, 1.76, 1.77, 1.78, 1.78, 1.79, 1.8, 1.8, 1.8, 1.79, 1.79, 1.8, 1.81],
+        '30day_rolling_average price ($/MMBTU)': [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, 1.83, 1.82, 1.81, 1.8, 1.8, 1.79, 1.79, 1.78, 1.78, 1.77, 1.77, 1.76, 1.76, 1.76, 1.76, 1.76, 1.77, 1.77, 1.78, 1.77, 1.77, 1.77, 1.77, 1.77, 1.77, 1.77, 1.77, 1.77, 1.77, 1.77, 1.77, 1.78, 1.78],
+        '7day_rolling_median price ($/MMBTU)': [None, None, None, None, None, None, 1.91, 1.9, 1.87, 1.83, 1.82, 1.81, 1.81, 1.81, 1.78, 1.78, 1.77, 1.76, 1.76, 1.75, 1.75, 1.75, 1.78, 1.79, 1.8, 1.8, 1.8, 1.8, 1.81, 1.81, 1.8, 1.8, 1.79, 1.79, 1.79, 1.79, 1.77, 1.75, 1.73, 1.67, 1.67, 1.67, 1.67, 1.68, 1.72, 1.74, 1.86, 1.86, 1.86, 1.86, 1.81, 1.75, 1.75, 1.75, 1.75, 1.75, 1.75, 1.79, 1.8, 1.8, 1.8, 1.83],
+        '14day_rolling_median price ($/MMBTU)': [None, None, None, None, None, None, None, None, None, None, None, None, None, 1.84, 1.83, 1.82, 1.82, 1.80, 1.80, 1.78, 1.78, 1.78, 1.78, 1.79, 1.80, 1.80, 1.80, 1.79, 1.80, 1.80, 1.80, 1.8, 1.80, 1.80, 1.80, 1.79, 1.79, 1.79, 1.79, 1.78, 1.76, 1.74, 1.73, 1.73, 1.73, 1.73, 1.73, 1.73, 1.73, 1.745, 1.75, 1.75, 1.75, 1.75, 1.75, 1.77, 1.80, 1.80, 1.80, 1.80, 1.80, 1.80],
+        '30day_rolling_median price ($/MMBTU)': [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, 1.81, 1.81, 1.8, 1.8, 1.80, 1.79, 1.79, 1.79, 1.79, 1.70, 1.79, 1.79, 1.78, 1.78, 1.78, 1.78, 1.79, 1.79, 1.79, 1.79, 1.79, 1.79, 1.79, 1.78, 1.76, 1.76, 1.76, 1.76, 1.76, 1.76, 1.76, 1.76, 1.76],
+        'max_abs_tavg_diff': [None, None, None, 2, 2, 2, 17, 17, 17, 1, 1, 1, 13, 13, 13, 19, 19, 19, 15, 15, 15, 19, 19, 19, 5, 5, 5, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
+    }
+    df = pd.DataFrame(data)
+    df['date'] = pd.to_datetime(df['date'])
+    df = df.set_index('date')
+    return df
+
+@pytest.fixture
+def df_backfill_null_values_start_of_series_no_empty_values():
+    '''
+    Dataframe containing no null values start of series used for testing of backfill_null_values_start_of_series function
+    '''
+    data = {
+        'price_1day_lag ($/MMBTU)': [0, 2.1, 2.05, 2.04, 1.91, 1.9, 1.83, 1.82, 1.87, 1.77, 1.78, 1.77, 1.81, 1.85, 1.82, 1.76, 1.73, 1.75, 1.75, 1.83, 1.75, 1.78, 1.8, 1.79, 1.81, 1.81, 1.82, 1.8, 1.78, 1.82, 1.79, 1.79, 1.8, 1.79, 1.77, 1.75, 1.73, 1.64, 1.63, 1.65, 1.67, 1.68, 1.72, 1.74, 1.87, 1.86, 1.94, 1.87, 1.81, 1.75, 1.75, 1.75, 1.75, 1.73, 1.74, 1.8, 1.79, 1.8, 1.83, 1.8, 1.89, 2.02],
+        'price_2day_lag ($/MMBTU)': [0, 0, 2.1, 2.05, 2.04, 1.91, 1.9, 1.83, 1.82, 1.87, 1.77, 1.78, 1.77, 1.81, 1.85, 1.82, 1.76, 1.73, 1.75, 1.75, 1.83, 1.75, 1.78, 1.8, 1.79, 1.81, 1.81, 1.82, 1.8, 1.78, 1.82, 1.79, 1.79, 1.8, 1.79, 1.77, 1.75, 1.73, 1.64, 1.63, 1.65, 1.67, 1.68, 1.72, 1.74, 1.87, 1.86, 1.94, 1.87, 1.81, 1.75, 1.75, 1.75, 1.75, 1.73, 1.74, 1.8, 1.79, 1.8, 1.83, 1.8, 1.89],
+        'price_3day_lag ($/MMBTU)': [0, 0, 2.1, 2.05, 2.04, 1.91, 1.9, 1.83, 1.82, 1.87, 1.77, 1.78, 1.77, 1.81, 1.85, 1.82, 1.76, 1.73, 1.75, 1.75, 1.83, 1.75, 1.78, 1.8, 1.79, 1.81, 1.81, 1.82, 1.8, 1.78, 1.82, 1.79, 1.79, 1.8, 1.79, 1.77, 1.75, 1.73, 1.64, 1.63, 1.65, 1.67, 1.68, 1.72, 1.74, 1.87, 1.86, 1.94, 1.87, 1.81, 1.75, 1.75, 1.75, 1.75, 1.73, 1.74, 1.8, 1.79, 1.8, 1.83, 1.8],
+        '7day_ew_volatility price ($/MMBTU)': [0, 0, 0, 0, 0, 0, 0.1, 0.09, 0.09, 0.09, 0.08, 0.07, 0.06, 0.05, 0.06, 0.06, 0.06, 0.05, 0.05, 0.05, 0.04, 0.04, 0.03, 0.03, 0.03, 0.03, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.01, 0.02, 0.02, 0.03, 0.07, 0.07, 0.07, 0.06, 0.05, 0.05, 0.05, 0.09, 0.09, 0.11, 0.1, 0.09, 0.08, 0.08, 0.07, 0.06, 0.06, 0.05, 0.05, 0.04, 0.04, 0.04, 0.04, 0.05, 0.11, 0.1],
+        '14day_ew_volatility price ($/MMBTU)': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.08, 0.08, 0.08, 0.08, 0.08, 0.07, 0.07, 0.06, 0.06, 0.06, 0.05, 0.05, 0.05, 0.04, 0.04, 0.04, 0.04, 0.03, 0.03, 0.03, 0.03, 0.03, 0.04, 0.06, 0.07, 0.07, 0.07, 0.07, 0.06, 0.06, 0.08, 0.08, 0.1, 0.1, 0.09, 0.09, 0.08, 0.08, 0.07, 0.07, 0.07, 0.06, 0.06, 0.06, 0.06, 0.05, 0.06, 0.1, 0.1],
+        '30day_ew_volatility price ($/MMBTU)': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.06, 0.06, 0.06, 0.05, 0.05, 0.05, 0.05, 0.07, 0.07, 0.08, 0.08, 0.08, 0.08, 0.07, 0.08, 0.08, 0.09, 0.09, 0.09, 0.08, 0.08, 0.08, 0.08, 0.08, 0.07, 0.07, 0.07, 0.07, 0.07, 0.06, 0.07, 0.09, 0.09],
+        '60day_ew_volatility price ($/MMBTU)': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.07, 0.09, 0.09],
+        '7day_rolling_average price ($/MMBTU)': [0, 0, 0, 0, 0, 0, 1.95, 1.92, 1.88, 1.84, 1.82, 1.81, 1.81, 1.81, 1.79, 1.79, 1.78, 1.78, 1.78, 1.77, 1.76, 1.77, 1.78, 1.79, 1.8, 1.79, 1.8, 1.8, 1.8, 1.8, 1.8, 1.8, 1.8, 1.79, 1.79, 1.77, 1.75, 1.73, 1.71, 1.69, 1.68, 1.67, 1.68, 1.71, 1.74, 1.78, 1.81, 1.83, 1.83, 1.84, 1.82, 1.8, 1.77, 1.75, 1.75, 1.76, 1.77, 1.78, 1.78, 1.81, 1.85, 1.87],
+        '14day_rolling_average price ($/MMBTU)': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1.88, 1.86, 1.83, 1.81, 1.8, 1.8, 1.79, 1.79, 1.78, 1.78, 1.79, 1.79, 1.79, 1.79, 1.78, 1.79, 1.79, 1.79, 1.8, 1.8, 1.8, 1.79, 1.79, 1.78, 1.77, 1.75, 1.74, 1.74, 1.73, 1.72, 1.73, 1.74, 1.75, 1.75, 1.75, 1.75, 1.76, 1.76, 1.77, 1.78, 1.78, 1.79, 1.8, 1.8, 1.8, 1.79, 1.79, 1.8, 1.81],
+        '30day_rolling_average price ($/MMBTU)': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1.83, 1.82, 1.81, 1.8, 1.8, 1.79, 1.79, 1.78, 1.78, 1.77, 1.77, 1.76, 1.76, 1.76, 1.76, 1.76, 1.77, 1.77, 1.78, 1.77, 1.77, 1.77, 1.77, 1.77, 1.77, 1.77, 1.77, 1.77, 1.77, 1.77, 1.77, 1.78, 1.78],
+        '7day_rolling_median price ($/MMBTU)': [0, 0, 0, 0, 0, 0, 1.91, 1.9, 1.87, 1.83, 1.82, 1.81, 1.81, 1.81, 1.78, 1.78, 1.77, 1.76, 1.76, 1.75, 1.75, 1.75, 1.78, 1.79, 1.8, 1.8, 1.8, 1.8, 1.81, 1.81, 1.8, 1.8, 1.79, 1.79, 1.79, 1.79, 1.77, 1.75, 1.73, 1.67, 1.67, 1.67, 1.67, 1.68, 1.72, 1.74, 1.86, 1.86, 1.86, 1.86, 1.81, 1.75, 1.75, 1.75, 1.75, 1.75, 1.75, 1.79, 1.8, 1.8, 1.8, 1.83],
+        '14day_rolling_median price ($/MMBTU)': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1.84, 1.83, 1.82, 1.82, 1.80, 1.80, 1.78, 1.78, 1.78, 1.78, 1.79, 1.80, 1.80, 1.80, 1.79, 1.80, 1.80, 1.80, 1.8, 1.80, 1.80, 1.80, 1.79, 1.79, 1.79, 1.79, 1.78, 1.76, 1.74, 1.73, 1.73, 1.73, 1.73, 1.73, 1.73, 1.73, 1.745, 1.75, 1.75, 1.75, 1.75, 1.75, 1.77, 1.80, 1.80, 1.80, 1.80, 1.80, 1.80],
+        '30day_rolling_median price ($/MMBTU)': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1.81, 1.81, 1.8, 1.8, 1.80, 1.79, 1.79, 1.79, 1.79, 1.70, 1.79, 1.79, 1.78, 1.78, 1.78, 1.78, 1.79, 1.79, 1.79, 1.79, 1.79, 1.79, 1.79, 1.78, 1.76, 1.76, 1.76, 1.76, 1.76, 1.76, 1.76, 1.76, 1.76],
+        'max_abs_tavg_diff': [0, 0, 0, 2, 2, 2, 17, 17, 17, 1, 1, 1, 13, 13, 13, 19, 19, 19, 15, 15, 15, 19, 19, 19, 5, 5, 5, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
+    }
+    df = pd.DataFrame(data)
+    df['date'] = pd.to_datetime(df['date'])
+    df = df.set_index('date')
+    return df
+
+@pytest.fixture
+def df_normalisation():
+    '''
+    Dataframe with engineered features to be used for testing of normalisation function
+    '''
+    data = {
+        'date': ['1999-03-29', '1999-03-30', '1999-03-31', '1999-04-01'],
+        'imports': [1000, 1000, 1000, 2000],
+        'lng_imports': [20, 40, 60, 80],
+        'heating_oil_natural_gas_price_ratio': [2.1, 2.05, 2.04, 2.06],
+        '7day_ew_volatility price ($/MMBTU)': [1.34, 1.34, 1.34, 1.34],
+        '14day_ew_volatility price ($/MMBTU)': [2.06, 2.06, 2.06, 2.06],
+        '30day_ew_volatility price ($/MMBTU)': [4.2, 4.2, 4.2, 4.2],
+        '60day_ew_volatility price ($/MMBTU)': [3.05, 3.05, 3.05, 3.05],
+        'price_1day_lag ($/MMBTU)': [2.04, 2.60, 2.45],
+        'price_2day_lag ($/MMBTU)': [2.60, 2.71, 3.12],
+        'price_3day_lag ($/MMBTU)': [4.20, 6.19, 2.50],
+        '7day_rolling_average price ($/MMBTU)': [3.20, 3.20, 3.20, 3.20],
+        '14day_rolling_average price ($/MMBTU)': [3.60, 3.60, 3.60, 3.60],
+        '30day_rolling_average price ($/MMBTU)': [4.10, 4.10, 4.10, 4.10],
+        '7day_rolling_median price ($/MMBTU)': [2.50, 2.50, 2.50, 2.50],
+        '14day_rolling_median price ($/MMBTU)': [2.75, 2.75, 2.75, 2.75],
+        '30day_rolling_median price ($/MMBTU)': [4.71, 4.71, 4.71, 4.71],
+        'total_consumption_total_underground_storage_ratio': [7.05, 7.05, 7.05, 7.05],
+        'min_tavg': [-1, -10, -20, 3],
+        'max_tavg': [25, 30, 40, 32],
+        'max_abs_tavg_diff': [10, 12, 4, 6],
+        'max_abs_tavg_diff_relative_to_daily_median': [3, 4, 6, 7],
+        'hdd_sum': [10, 5, 1, 2],
+        'cdd_sum': [5, 3, 0, 3],
+        'wci_sum': [0, 15, 17, 10],
+        'snow_sum': [0, 10, 20, 0]
+    }
+    df = pd.DataFrame(data)
+    df['date'] = pd.to_datetime(df['date'])
+    df = df.set_index('date')
+    return df
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     
 
 

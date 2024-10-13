@@ -25,6 +25,19 @@ class EtlTransforms:
         Pivots columns in dataframe and returns modified dataframe
     drop_null(cls, df):
         Drops all null rows in dataframe and returns modified dataframe
+    set_date_index(cls, df):
+        Sets date as index for given dataframe 
+    merge_dataframes(cls, daily_weather_df,  natural_gas_monthly_variables_df, 
+    natural_gas_rigs_in_operation_df, natural_gas_spot_prices_df, heating_oil_spot_prices_df):
+        Merges dataframes representing each of the transformed sources from transformation folder in S3 Bucket
+    forwardfill_null_values_end_of_series(cls, df):
+        Forward fills null values for monthly natural gas variables and weather variables at the
+        end of time series
+    backfill_null_values_start_of_series(cls, df):
+        Back fills nulls values at start of series for volatility, lag, rolling
+        and maximum day to day average temperature change
+    normalisation(cls, df, fit_transform):
+        Normalises dataframe before training machine learning model on dataframe
     '''
     @classmethod
     def json_to_df(cls, data: json) -> pd.DataFrame:
@@ -184,7 +197,7 @@ class EtlTransforms:
             df (pd.DataFrame): Merged dataframe
         
         Returns:
-            pd.DataFrame: Returns dataframe with columns will null values end of series forward filled
+            pd.DataFrame: Returns dataframe with columns with null values end of series forward filled
         '''
         columns_to_ffill = ['residential_consumption', 'commerical_consumption', 'total_underground_storage'
         'imports', 'lng_imports', 'natural_gas_rigs_in_operation', 'awnd', 'snow', 'tavg']
@@ -193,6 +206,25 @@ class EtlTransforms:
             last_valid_index = df[col].last_valid_index()
             df.loc[last_valid_index:, col] = df.loc[last_valid_index:, col].ffill()
         
+        return df
+
+    @classmethod
+    def backfill_null_values_start_of_series(cls, df: pd.DataFrame) -> pd.DataFrame:
+        '''
+        Back fills nulls values at start of series for volatility, lag, rolling
+        and maximum day to day average temperature change
+
+        Args:
+            df (pd.DataFrame): Merged dataframe
+        
+        Returns:
+            pd.DataFrame: Returns dataframe with columns with null values at start of series back filled
+        '''
+        columns_to_backfill = ['7day_ew_volatility price ($/MMBTU)', '14day_ew_volatility price ($/MMBTU)', '30day_ew_volatility price ($/MMBTU)',
+        '60day_ew_volatility_price ($/MMBTU)', 'price_1day_lag ($/MMBTU)', 'price_2day_lag ($/MMBTU)', 'price_3day_lag ($/MMBTU)',
+        '7day_rolling_average price ($/MMBTU)', '14day_rolling_average price ($/MMBTU)', '30day_rolling_average price ($/MMBTU)', 
+        '7day_rolling_median price ($/MMBTU)', '14day_rolling_median price ($/MMBTU)', '30day_rolling_median price ($/MMBTU)', 'max_abs_tavg_diff']
+        df[columns_to_backfill] = df[columns_to_backfill].fillna('bfill')
         return df
     
     @classmethod
