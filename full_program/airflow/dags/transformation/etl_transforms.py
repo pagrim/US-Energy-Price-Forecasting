@@ -180,10 +180,13 @@ class EtlTransforms:
         heating_oil_spot_prices_df = heating_oil_spot_prices_df.loc[common_dates_spot_prices]
         spot_prices_merged_df = pd.merge(natural_gas_spot_prices_df, heating_oil_spot_prices_df, left_index=True, right_index=True)
         monthly_variables_merged_df = pd.merge(natural_gas_monthly_variables_df, natural_gas_rigs_in_operation_df, left_index=True, right_index=True)
-        monthly_variables_merged_df['year_month'] = monthly_variables_merged_df.index.dt.to_period('M')
-        spot_prices_merged_df['year_month'] = spot_prices_merged_df.index.dt.to_period('M')
+        spot_prices_merged_df = spot_prices_merged_df.reset_index()
+        monthly_variables_merged_df = monthly_variables_merged_df.reset_index()
+        monthly_variables_merged_df['year_month'] = monthly_variables_merged_df['date'].dt.to_period('M')
+        spot_prices_merged_df['year_month'] = spot_prices_merged_df['date'].dt.to_period('M')
         df = pd.merge(spot_prices_merged_df, monthly_variables_merged_df, on='year_month', how='inner')
-        df = EtlTransforms.drop_columns(df=df, columns=['year_month'])
+        df = df.drop(columns=['year_month', 'date_y'], axis=1)
+        df = df.set_index('date_x')
         df = pd.merge(df, daily_weather_df, left_index=True, right_index=True)
         return df
     
