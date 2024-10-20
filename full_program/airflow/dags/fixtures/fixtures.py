@@ -7,6 +7,7 @@ import boto3
 import pandas as pd
 from unittest.mock import patch, MagicMock
 from utils.aws import S3, S3Metadata
+from utils.config import Config
 
 @pytest.fixture
 def mock_environment_variables(mocker):
@@ -20,15 +21,30 @@ def mock_environment_variables(mocker):
     })
 
 @pytest.fixture
-def mock_boto3_s3(mocker):
-    ''' Mocks S3 bucket for testing '''
-    mock_s3 = mocker.patch('boto3.client', return_value=MagicMock())
-    yield mock_s3
+def mock_s3(mocker, mock_environment_variables):
+    ''' Mocks S3 class for testing '''
+    config = Config()
+    s3 = S3(config)
+    return s3
 
 @pytest.fixture
-def mock_get_data(mocker):
+def mock_s3_metadata(mocker, mock_environment_variables):
+    ''' Mocks S3Metadata class for testing '''
+    config = Config()
+    s3 = S3(config)
+    s3_metadata = S3Metadata(config)
+    return s3_metadata
+
+@pytest.fixture
+def mock_boto3_client(mocker):
+    ''' Mocks boto3.client for testing '''
+    mock_s3_client = mocker.patch('boto3.client', return_value=MagicMock())
+    yield mock_s3_client
+
+@pytest.fixture
+def mock_get_data(mocker, mock_s3):
     ''' Mocks get_data method of S3 object '''
-    mock_s3_get_data = mocker.patch.object(S3, 'get_data')
+    mock_s3_get_data = mocker.patch.object(mock_s3, 'get_data')
     return mock_s3_get_data
 
 @pytest.fixture
@@ -91,8 +107,7 @@ def mock_natural_gas_spot_prices_response():
             "series-description": "Henry Hub Natural Gas Spot Price (Dollars per Million Btu)",
             "value": "2.06", "units": "$/MMBTU"}]
     response_dict = {"response": {"data": data}}
-    response_json = json.dumps(response_dict)
-    return response_json
+    return response_dict
 
 @pytest.fixture
 def mock_noaa_daily_weather_data_response():
@@ -113,8 +128,7 @@ def mock_metadata_response():
         'natural_gas_monthly_variables': ['2024-03'],
         'daily_weather': ['2024-05-21', '2024-05-23']
     }
-    response_json = json.dumps(data)
-    return response_json
+    return data
 
 @pytest.fixture
 def df_etl_transforms_testing():
