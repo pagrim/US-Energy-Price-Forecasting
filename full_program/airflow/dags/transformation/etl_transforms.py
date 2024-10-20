@@ -36,6 +36,10 @@ class EtlTransforms:
     backfill_null_values_start_of_series(cls, df):
         Back fills nulls values at start of series for volatility, lag, rolling
         and maximum day to day average temperature change
+    create_test_data(df, holdout):
+        Creates test data to be used when evaluating training model performance
+    create_sequence(x, y, sequence_length):
+        Creates sequences for LSTM
     normalisation(cls, df, fit_transform):
         Normalises dataframe before training machine learning model on dataframe
     '''
@@ -231,7 +235,44 @@ class EtlTransforms:
         return df
     
     @classmethod
-    def normalisation(cls, df: pd.DataFrame, fit_transform: bool) -> pd.DataFrame:
+    def create_test_data(cls, df: pd.DataFrame, holdout: float) -> pd.DataFrame:
+        ''' 
+        Creates test data to be used when evaluating training model performance
+
+        Args:
+            df (pd.DataFrame): Dataframe to be used to create test data
+            holdout (float): Percentage of dataframe to be used as test data
+            Percentage expressed as value between 0 and 1
+        
+        Returns:
+            pd.DataFrame: Holdout dataframe
+          '''
+        n_rows = len(df)
+        n_holdout_rows = int(n_rows * holdout)
+        holdout_df = df.iloc[-n_holdout_rows:]
+        return holdout_df
+
+    @classmethod
+    def create_sequences(cls, x: pd.DataFrame, y: pd.DataFrame, sequence_length: int) -> np.array:
+        '''
+        Creates sequences for LSTM
+
+        Args:
+            x (pd.DataFrame): Dataframe of input variables into the model
+            y (pd.DataFrame): Dataframe of output variables into the model
+            sequence_length (int): Number of elements in each sequence
+        
+        Returns:
+            np.array: Returns array of sequences for both input and output variables
+        '''
+        x_array, y_array = [], []
+        for i in range(len(y) - sequence_length):
+            x_array.append(x.iloc[i:i + sequence_length])
+            y_array.append(y.iloc[i + sequence_length])
+        return np.array(x_array), np.array(y_array)
+    
+    @classmethod
+    def normalisation(cls, train_df: pd.DataFrame, test_df: pd.DataFrame) -> pd.DataFrame:
         '''
         Normalises dataframe before training machine learning model on dataframe
 
@@ -254,14 +295,12 @@ class EtlTransforms:
         log_columns = ['snow_sum']
         robust_scaler = RobustScaler()
 
-        if fit_transform is True:
-            df[robust_columns] = robust_scaler.fit_transform(df[robust_columns])
+        train_df[robust_columns] = robust_scaler.fit_transform(train_df[robust_columns])
+        test_df[robust_columns] = robust_scaler.transform(test_df[robust_columns])
         
-        else:
-            df[robust_columns] = robust_scaler.transform(df[robust_columns])
-        
-        df[log_columns] = np.log(df[log_columns] + 1)
-        return df
+        train_df[log_columns] = np.log(train_df[log_columns] + 1)
+        test_df[log_columns] = np.log(test_df[log_columns] + 1)
+        return train_df, test_df
         
 
 

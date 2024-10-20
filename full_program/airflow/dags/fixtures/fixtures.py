@@ -540,9 +540,9 @@ def df_backfill_null_values_start_of_series_no_empty_values():
     return df
 
 @pytest.fixture
-def df_normalisation():
+def merged_df():
     '''
-    Dataframe with engineered features to be used for testing of normalisation function
+    Dataframe test data is going to be created from for the create_test_data, create_sequences and normalisation function
     '''
     data = {
         'date': ['1999-03-29', '1999-03-30', '1999-03-31', '1999-04-01'],
@@ -553,9 +553,9 @@ def df_normalisation():
         '14day_ew_volatility price ($/MMBTU)': [2.06, 2.06, 2.06, 2.06],
         '30day_ew_volatility price ($/MMBTU)': [4.2, 4.2, 4.2, 4.2],
         '60day_ew_volatility price ($/MMBTU)': [3.05, 3.05, 3.05, 3.05],
-        'price_1day_lag ($/MMBTU)': [2.04, 2.60, 2.45],
-        'price_2day_lag ($/MMBTU)': [2.60, 2.71, 3.12],
-        'price_3day_lag ($/MMBTU)': [4.20, 6.19, 2.50],
+        'price_1day_lag ($/MMBTU)': [2.04, 2.60, 2.45, 1.23],
+        'price_2day_lag ($/MMBTU)': [2.60, 2.71, 3.12, 4.90],
+        'price_3day_lag ($/MMBTU)': [4.20, 6.19, 2.50, 6.90],
         '7day_rolling_average price ($/MMBTU)': [3.20, 3.20, 3.20, 3.20],
         '14day_rolling_average price ($/MMBTU)': [3.60, 3.60, 3.60, 3.60],
         '30day_rolling_average price ($/MMBTU)': [4.10, 4.10, 4.10, 4.10],

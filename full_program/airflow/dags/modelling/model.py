@@ -13,45 +13,8 @@ from sklearn.metrics import mean_absolute_error
 
 class Model:
     ''' 
-    Class used for modelling of data 
+    Class used for modelling of data
     '''
-    @classmethod
-    def create_test_data(cls, df: pd.DataFrame, holdout: float) -> pd.DataFrame:
-        ''' 
-        Creates test data to be used when evaluating training model performance
-
-        Args:
-            df (pd.DataFrame): Dataframe to be used to create test data
-            holdout (float): Percentage of dataframe to be used as test data
-            Percentage expressed as value between 0 and 1
-        
-        Returns:
-            pd.DataFrame: Holdout dataframe
-          '''
-        n_rows = len(df)
-        n_holdout_rows = int(n_rows * holdout)
-        holdout_df = df.iloc[-n_holdout_rows:]
-        return holdout_df
-    
-    @classmethod
-    def create_sequences(cls, x: pd.DataFrame, y: pd.DataFrame, sequence_length: int) -> np.array:
-        '''
-        Creates sequences for LSTM
-
-        Args:
-            x (pd.DataFrame): Dataframe of input variables into the model
-            y (pd.DataFrame): Dataframe of output variables into the model
-            sequence_length (int): Number of elements in each sequence
-        
-        Returns:
-            np.array: Returns array of sequences for both input and output variables
-        '''
-        x_array, y_array = [], []
-        for i in range(len(y) - sequence_length):
-            x_array.append(x[i:i + sequence_length])
-            y_array.append(y[i + sequence_length])
-        return np.array(x_array), np.array(y_array)
-    
     @classmethod
     def train_model(cls, x_train: np.array, y_train: np.array, x_test: np.array, y_test: np.array, time_steps: int, experiment_id: str, forecast_horizon: int) -> None:
         ''' 
