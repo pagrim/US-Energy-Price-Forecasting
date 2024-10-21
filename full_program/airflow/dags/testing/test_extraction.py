@@ -5,16 +5,16 @@ import requests
 from unittest.mock import patch, MagicMock
 from extraction.eia_api import EIA
 from extraction.noaa_api import NOAA
-from fixtures.fixtures import mock_environment_variables, mock_boto3_s3, mock_requests_get, mock_get_latest_end_date, mock_eia_headers, mock_noaa_parameters mock_natural_gas_spot_prices_response, mock_noaa_daily_weather_data_response
+from fixtures.fixtures import mock_environment_variables, mock_boto3_client, mock_eia, mock_requests_get, mock_get_latest_end_date, mock_update_metadata, mock_eia_headers, mock_noaa_parameters, mock_natural_gas_spot_prices_response, mock_noaa_daily_weather_data_response
 
 class TestEIA:
     ''' Test class for testing EIA class '''
-    def test_eia_api_request_success_with_latest_end_date_default_offset(self, mock_environment_variables, mock_requests_get, mock_get_latest_end_date, mock_eia_headers, mock_natural_gas_spot_prices_response):
+    def test_eia_api_request_success_with_latest_end_date_default_offset(self, mock_environment_variables, mock_eia, mock_requests_get, mock_get_latest_end_date, mock_eia_headers, mock_natural_gas_spot_prices_response):
         ''' Test api_request method of EIA class where latest end date is specified for a given dataset key '''
         mock_get_latest_end_date.return_value = '1999-01-04'
         mock_response = requests.Response()
         mock_response.status_code = 200
-        mock_response._content = mock_natural_gas_spot_prices_response
+        mock_response._content = json.dumps(mock_natural_gas_spot_prices_response).encode('utf-8')
         mock_requests_get.return_value = mock_response
         
         headers = mock_eia_headers
@@ -24,7 +24,7 @@ class TestEIA:
         metadata_dataset_key = 'natural_gas_spot_prices'
         start_date_if_none = ''
         
-        response = EIA.api_request(endpoint=endpoint,
+        response = mock_eia.api_request(endpoint=endpoint,
         headers = headers,
         metadata_folder = metadata_folder,
         metadata_object_key = metadata_object_key,
@@ -51,17 +51,16 @@ class TestEIA:
             timeout=30
         )
         assert response.status_code == 200
-        assert response.json() == json.loads(mock_natural_gas_spot_prices_response)
+        assert response.json() == mock_natural_gas_spot_prices_response
     
-    def test_eia_api_request_success_with_non_default_offset(self, mock_environment_variables, mock_requests_get, mock_get_latest_end_date, mock_eia_headers, mock_natural_gas_spot_prices_response):
+    def test_eia_api_request_success_with_non_default_offset(self, mock_environment_variables, mock_eia, mock_requests_get, mock_get_latest_end_date, mock_eia_headers, mock_natural_gas_spot_prices_response):
         ''' Test api_request method of EIA class where latest end date is specified for a given dataset key and non-default offset '''
         mock_get_latest_end_date.return_value = '1999-01-04'
         mock_response = requests.Response()
         mock_response.status_code = 200
-        mock_response._content = mock_natural_gas_spot_prices_response
+        mock_response._content = json.dumps(mock_natural_gas_spot_prices_response).encode('utf-8')
         mock_requests_get.return_value = mock_response
 
-        headers = mock_eia_headers
         endpoint = 'natural-gas/pri/fut/data/'
         headers = mock_eia_headers
         metadata_folder = 'metadata/'
@@ -70,7 +69,7 @@ class TestEIA:
         start_date_if_none = ''
         offset = 5000
         
-        response = EIA.api_request(endpoint=endpoint,
+        response = mock_eia.api_request(endpoint=endpoint,
         headers = headers,
         metadata_folder = metadata_folder,
         metadata_object_key = metadata_object_key,
@@ -98,14 +97,14 @@ class TestEIA:
             timeout=30
         )
         assert response.status_code == 200
-        assert response.json() == json.loads(mock_natural_gas_spot_prices_response)
+        assert response.json() == mock_natural_gas_spot_prices_response
     
-    def test_eia_api_request_with_latest_end_date_none(self, mock_environment_variables, mock_requests_get, mock_get_latest_end_date, mock_eia_headers, mock_natural_gas_spot_prices_response):
+    def test_eia_api_request_with_latest_end_date_none(self, mock_environment_variables, mock_eia, mock_requests_get, mock_get_latest_end_date, mock_eia_headers, mock_natural_gas_spot_prices_response):
         ''' Test api_request method of EIA class where latest end date is specified for a given dataset key and non-default offset '''
         mock_get_latest_end_date.return_value = None
         mock_response = requests.Response()
         mock_response.status_code = 200
-        mock_response._content = mock_natural_gas_spot_prices_response
+        mock_response._content = json.dumps(mock_natural_gas_spot_prices_response).encode('utf-8')
         mock_requests_get.return_value = mock_response
 
         headers = mock_eia_headers
@@ -116,7 +115,7 @@ class TestEIA:
         start_date_if_none = '1999-01-04'
         offset = 0
         
-        response = EIA.api_request(endpoint=endpoint,
+        response = mock_eia.api_request(endpoint=endpoint,
         headers = headers,
         metadata_folder = metadata_folder,
         metadata_object_key = metadata_object_key,
@@ -144,12 +143,11 @@ class TestEIA:
             timeout=30
         )
         assert response.status_code == 200
-        assert response.json() == json.loads(mock_natural_gas_spot_prices_response)
+        assert response.json() == mock_natural_gas_spot_prices_response
 
-    def test_eia_api_request_error(self, mock_environment_variables, mock_requests_get, mock_eia_headers):
+    def test_eia_api_request_error(self, mock_environment_variables, mock_eia, mock_requests_get, mock_eia_headers):
         ''' Test api_request method of EIA class where an error is produced for a given request '''
         mock_requests_get.side_effect = requests.RequestException("API Error")
-        
         headers = mock_eia_headers
         endpoint = 'natural-gas/pri/fut/data/'
         metadata_folder = 'metadata/'
@@ -158,39 +156,49 @@ class TestEIA:
         start_date_if_none = '1999-01-04'
         offset = 0
         
-        response = EIA.api_request(endpoint=endpoint, 
+        response = mock_eia.api_request(endpoint=endpoint, 
         headers=headers,
         metadata_folder = metadata_folder,
         metadata_object_key = metadata_object_key,
         metadata_dataset_key = metadata_dataset_key,
         start_date_if_none = start_date_if_none,
         offset=offset)
-        
-        assert response == ('Error occurred', requests.RequestException("API Error"))
 
-    def test_eia_api_get_max_date_with_data(self, mock_natural_gas_spot_prices_response):
+        assert response[0] == 'Error occurred'
+        assert isinstance(response[1], requests.RequestException)
+        assert str(response[1] == 'API Error')
+
+    def test_eia_api_get_max_date_with_data(self, mock_eia, mock_natural_gas_spot_prices_response):
         ''' Test get_max_period method of EIA class where data is not None '''
-        data = mock_natural_gas_spot_prices_response 
-        result = EIA.get_max_date(data=data)
+        data = mock_natural_gas_spot_prices_response['response']['data']
+        result = mock_eia.get_max_date(data=data)
         assert result == '1999-01-05'
     
-    def test_eia_api_get_max_date_with_no_data(self):
+    def test_eia_api_get_max_date_with_no_data(self, mock_eia):
         ''' Test get_max_period method of EIA class where data is None '''
         data = []
-        result = EIA.get_max_date(data=data)
+        result = mock_eia.get_max_date(data=data)
         assert result is None
 
-    def test_eia_extract_success(self, mock_environment_variables, mock_requests_get, mock_boto3_s3, mock_eia_headers, mock_natural_gas_spot_prices_response,
-        mock_update_metadata):
+    def test_eia_extract_success(self, mock_environment_variables, mock_eia, mock_requests_get, mock_boto3_client, mock_eia_headers, mock_natural_gas_spot_prices_response,
+        mock_update_metadata, mock_get_latest_end_date):
         ''' Test eia_extract method of EIA class where max_period is not None '''
+        mock_get_latest_end_date.return_value = '1999-01-04'
         mock_response = MagicMock()
         mock_response.status_code = 200
-        mock_response.json.return_value = json.loads(mock_natural_gas_spot_prices_response)
-        mock_requests_get.side_effect = [mock_response, mock_response]
+        mock_response.json.return_value = mock_natural_gas_spot_prices_response
+        mock_response_no_data = MagicMock()
+        mock_response_no_data.status_code = 200
+        mock_response_no_data.json.return_value = {
+        'response': {
+            'data': []  # No more data
+        }
+        }
+        mock_requests_get.side_effect = [mock_response, mock_response_no_data]
 
         headers = mock_eia_headers
         endpoint = 'natural-gas/pri/fut/data/'
-        folder = 'full_program/extraction'
+        folder = 'full_program/extraction/'
         object_key = 'natural_gas_spot_prices'
         metadata_folder = 'metadata/'
         metadata_object_key = 'metadata'
@@ -198,17 +206,19 @@ class TestEIA:
         start_date_if_none = '1999-01-04'
         offset = 0
 
-        EIA.extract(endpoint=endpoint, headers=headers, folder=folder, object_key=object_key,
+        mock_eia.extract(endpoint=endpoint, headers=headers, folder=folder, object_key=object_key,
         metadata_folder=metadata_folder, metadata_object_key=metadata_object_key,
         metadata_dataset_key=metadata_dataset_key, start_date_if_none=start_date_if_none,
         offset=offset)
         
         assert mock_requests_get.call_count == 2
-        mock_boto3_s3.put_data.assert_called_once_with(
-        data=mock_natural_gas_spot_prices_response,
-        folder=folder,
-        object_key=object_key
+        mock_update_metadata.assert_called_once_with(
+        folder=metadata_folder,
+        object_key=metadata_object_key,
+        dataset_key=object_key,
+        new_date='1999-01-05'
         )
+        mock_boto3_client.return_value.put_object.assert_called_once()
         mock_update_metadata.assert_called_once_with(
         folder=metadata_folder,
         object_key=metadata_object_key,
