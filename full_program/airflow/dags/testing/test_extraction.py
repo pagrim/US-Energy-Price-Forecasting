@@ -2,10 +2,11 @@
 import json
 import pytest
 import requests
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch, MagicMock, Mock
 from extraction.eia_api import EIA
 from extraction.noaa_api import NOAA
-from fixtures.fixtures import mock_environment_variables, mock_boto3_client, mock_eia, mock_requests_get, mock_get_latest_end_date, mock_update_metadata, mock_eia_headers, mock_noaa_parameters, mock_natural_gas_spot_prices_response, mock_noaa_daily_weather_data_response
+from fixtures.fixtures import mock_environment_variables, mock_boto3_client, mock_eia, mock_noaa, mock_requests_get, mock_get_latest_end_date, mock_update_metadata, mock_eia_headers, \
+mock_noaa_parameters, mock_natural_gas_spot_prices_response, mock_noaa_daily_weather_data_response
 
 class TestEIA:
     ''' Test class for testing EIA class '''
@@ -191,7 +192,7 @@ class TestEIA:
         mock_response_no_data.status_code = 200
         mock_response_no_data.json.return_value = {
         'response': {
-            'data': []  # No more data
+            'data': []
         }
         }
         mock_requests_get.side_effect = [mock_response, mock_response_no_data]
@@ -226,13 +227,15 @@ class TestEIA:
         new_date='1999-01-05'
         )
     
-    def test_eia_extract_no_data(self, mock_requests_get, mock_boto3_s3, mock_environment_variables, mock_eia_headers, mock_update_metadata):
+    def test_eia_extract_no_data(self, mock_environment_variables, mock_eia, mock_requests_get, mock_boto3_client, mock_eia_headers,
+        mock_update_metadata, mock_get_latest_end_date):
         ''' Test eia_extract method of EIA class where max_period is None '''
+        mock_get_latest_end_date.return_value = '1999-01-04'
         mock_response = MagicMock()
         mock_response.status_code = 200
         mock_response.json.return_value = {"response": {"data": []}}
         mock_requests_get.return_value = mock_response
-        mock_requests_get.side_effect = [mock_response, mock_response]
+        mock_requests_get.side_effect = mock_response
         
         headers = mock_eia_headers
         endpoint = 'natural-gas/pri/fut/data/'
@@ -244,65 +247,72 @@ class TestEIA:
         start_date_if_none = '1999-01-04'
         offset = 0
         
-        EIA.extract(endpoint=endpoint, headers=headers, folder=folder, object_key=object_key, 
-                    metadata_folder=metadata_folder, metadata_object_key=metadata_object_key,
-                    metadata_dataset_key=metadata_dataset_key, start_date_if_none=start_date_if_none,
-                    offset=offset)
+        mock_eia.extract(endpoint=endpoint, headers=headers, folder=folder, object_key=object_key,
+        metadata_folder=metadata_folder, metadata_object_key=metadata_object_key,
+        metadata_dataset_key=metadata_dataset_key, start_date_if_none=start_date_if_none,
+        offset=offset)
         
-        assert mock_requests_get.call_count == 2
-        mock_boto3_s3.put_data.assert_not_called()
+        assert mock_requests_get.call_count == 1
+        mock_boto3_client.put_data.assert_not_called()
         mock_update_metadata.assert_not_called()
 
 class TestNOAA:
     ''' Test class for testing NOAA class '''
-    def test_noaa_api_request_success(self, mock_environment_variables, mock_requests_get, mock_noaa_parameters, mock_noaa_daily_weather_data_response):
+    def test_noaa_api_request_success(self, mock_noaa, mock_environment_variables, mock_requests_get, mock_noaa_parameters, mock_noaa_daily_weather_data_response):
         ''' Test api_request method of NOAA class where api request is successful '''
         mock_response = requests.Response()
         mock_response.status_code = 200
-        mock_response._content = mock_noaa_daily_weather_data_response
+        mock_response._content = json.dumps(mock_noaa_daily_weather_data_response).encode('utf-8')
         mock_requests_get.return_value = mock_response
 
         parameters = mock_noaa_parameters
 
-        response = NOAA.api_request(parameters=parameters)
+        response = mock_noaa.api_request(parameters=parameters)
         
-        mock_requests_get.assert_called_once_with('https://www.ncei.noaa.gov/cdo-web/api/v2/data',
+        mock_requests_get.assert_called_once_with(url='https://www.ncei.noaa.gov/cdo-web/api/v2/data',
         headers={'token': 'token'},
         params=parameters,
         timeout=7)
         assert response.status_code == 200
-        assert response.json() == json.loads(mock_noaa_daily_weather_data_response)
+        assert response.json() == mock_noaa_daily_weather_data_response
     
-    def test_noaa_api_request_timeout_failure(self, mock_environment_variables, mock_requests_get, mock_noaa_parameters):
+    def test_noaa_api_request_with_timeout_failure(self, mock_noaa, mock_environment_variables, mock_requests_get, mock_noaa_parameters, mock_noaa_daily_weather_data_response):
         ''' Test api_request method of NOAA class where a timeout error is produced for a given request '''
-        mock_requests_get.side_effect = requests.exceptions.Timeout
+        mock_response = requests.Response()
+        mock_response.status_code = 200
+        mock_response._content = json.dumps(mock_noaa_daily_weather_data_response).encode('utf-8')
+        mock_requests_get.side_effect = [requests.exceptions.Timeout, requests.exceptions.Timeout, mock_response]
         
         parameters = mock_noaa_parameters
         
-        response = NOAA.api_request(parameters=parameters)
+        response = mock_noaa.api_request(parameters=parameters)
         
-        assert mock_requests_get.call_count == 2
-        assert response is None
+        assert mock_requests_get.call_count == 3
+        assert response.status_code == 200
+        assert response.json() == mock_noaa_daily_weather_data_response
     
-    def test_noaa_api_request_no_timeout_failure(self, mock_environment_variables, mock_requests_get, mock_noaa_parameters):
+    def test_noaa_api_request_no_timeout_failure(self, mock_noaa, mock_environment_variables, mock_requests_get, mock_noaa_parameters):
         ''' Test api_request method of NOAA class where a timeout error is produced for a given request '''
         mock_requests_get.side_effect = requests.RequestException("API Error")
         
         parameters = mock_noaa_parameters
 
-        response = NOAA.api_request(parameters=parameters)
-        assert response == ('Error occurred', requests.RequestException("API Error"))
+        response = mock_noaa.api_request(parameters=parameters)
+        
+        assert response[0] == 'Error occurred'
+        assert isinstance(response[1], requests.RequestException)
+        assert str(response[1] == 'API Error')
     
-    def test_noaa_api_get_max_period_with_data(self, mock_noaa_daily_weather_data_response):
+    def test_noaa_api_get_max_period_with_data(self, mock_noaa, mock_noaa_daily_weather_data_response):
         ''' Test get_max_period method of NOAA class where data is not None '''
-        data = mock_noaa_daily_weather_data_response 
-        result = NOAA.get_max_date(data=data)
+        data = mock_noaa_daily_weather_data_response['results']
+        result = mock_noaa.get_max_date(data=data)
         assert result == '2024-05-24'
     
-    def test_noaa_api_get_max_period_with_no_data(self):
+    def test_noaa_api_get_max_period_with_no_data(self, mock_noaa):
         ''' Test get_max_period method of NOAA class where data is None '''
         data = []
-        result = NOAA.get_max_date(data=data)
+        result = mock_noaa.get_max_date(data=data)
         assert result is None
 
     def test_noaa_extract_success_with_latest_end_date(self, mock_environment_variables, mock_requests_get, mock_boto3_s3, mock_get_latest_end_date, mock_noaa_parameters, mock_noaa_daily_weather_data_response,

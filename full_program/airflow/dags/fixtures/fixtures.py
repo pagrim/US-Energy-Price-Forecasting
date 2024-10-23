@@ -1,4 +1,4 @@
-''' Import modules'''
+''' Import modules '''
 import os
 import json
 import pytest
@@ -8,6 +8,8 @@ import pandas as pd
 from unittest.mock import patch, MagicMock
 from utils.aws import S3, S3Metadata
 from utils.config import Config
+from extraction.eia_api import *
+from extraction.noaa_api import *
 
 @pytest.fixture
 def mock_environment_variables(mocker):
@@ -24,7 +26,7 @@ def mock_environment_variables(mocker):
 def mock_s3(mocker, mock_environment_variables):
     ''' Mocks S3 class for testing '''
     config = Config()
-    s3 = S3(config)
+    s3 = S3(config=config)
     return s3
 
 @pytest.fixture
@@ -32,7 +34,7 @@ def mock_s3_metadata(mocker, mock_environment_variables):
     ''' Mocks S3Metadata class for testing '''
     config = Config()
     s3 = S3(config)
-    s3_metadata = S3Metadata(config)
+    s3_metadata = S3Metadata(config=config)
     return s3_metadata
 
 @pytest.fixture
@@ -46,6 +48,24 @@ def mock_get_data(mocker, mock_s3):
     ''' Mocks get_data method of S3 object '''
     mock_s3_get_data = mocker.patch.object(mock_s3, 'get_data')
     return mock_s3_get_data
+
+@pytest.fixture
+def mock_eia(mocker, mock_environment_variables):
+    ''' Mocks EIA class for testing '''
+    config = Config()
+    s3 = S3(config=config)
+    s3_metadata = S3Metadata(config=config)
+    eia = EIA(config=config, s3=s3, s3_metadata=s3_metadata)
+    return eia
+
+@pytest.fixture
+def mock_noaa(mocker, mock_environment_variables):
+    ''' Mocks NOAA class for testing '''
+    config = Config()
+    s3 = S3(config=config)
+    s3_metadata = S3Metadata(config=config)
+    noaa = NOAA(config=config, s3=s3, s3_metadata=s3_metadata)
+    return noaa
 
 @pytest.fixture
 def mock_requests_get(mocker):
@@ -116,8 +136,7 @@ def mock_noaa_daily_weather_data_response():
             {'date': '1999-01-05', 'datatype': 'AWND', 'station': 'GHCND:USW00094847', 'value': 4.2, 'city':'Detroit', 'state': 'Michigan'},
             {'date': '2024-05-24', 'datatype': 'AWND', 'station': 'GHCND:USW00094847', 'value': 4.0, 'city':'Detroit', 'state': 'Michigan'}]
     response_dict = {"results": data}
-    response_json = json.dumps(response_dict)
-    return response_json
+    return response_dict
 
 @pytest.fixture
 def mock_metadata_response():
