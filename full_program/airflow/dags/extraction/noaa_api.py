@@ -77,7 +77,6 @@ class NOAA:
             try:
                 response = requests.get(url = self.base_url, headers = {'token': self.token},
                                         params = parameters, timeout=7)
-                print(response)
                 if response.status_code == 200:
                     return response
             
@@ -127,9 +126,9 @@ class NOAA:
 
         while True:
             response = self.api_request(parameters=parameters)
-            results = response.json()['results']
+            results = response.json().get('results', [])
 
-            if results is None:
+            if not results:
                 break
             
             for record in results:

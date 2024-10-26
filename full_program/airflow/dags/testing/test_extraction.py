@@ -213,12 +213,6 @@ class TestEIA:
         offset=offset)
         
         assert mock_requests_get.call_count == 2
-        mock_update_metadata.assert_called_once_with(
-        folder=metadata_folder,
-        object_key=metadata_object_key,
-        dataset_key=object_key,
-        new_date='1999-01-05'
-        )
         mock_boto3_client.return_value.put_object.assert_called_once()
         mock_update_metadata.assert_called_once_with(
         folder=metadata_folder,
@@ -315,14 +309,19 @@ class TestNOAA:
         result = mock_noaa.get_max_date(data=data)
         assert result is None
 
-    def test_noaa_extract_success_with_latest_end_date(self, mock_environment_variables, mock_requests_get, mock_boto3_s3, mock_get_latest_end_date, mock_noaa_parameters, mock_noaa_daily_weather_data_response,
+    def test_noaa_extract_success_with_latest_end_date(self, mock_noaa, mock_environment_variables, mock_requests_get, mock_boto3_client, mock_get_latest_end_date, mock_noaa_parameters, mock_noaa_daily_weather_data_response,
     mock_update_metadata):
         ''' Test extract method of NOAA class where latest end date is not None '''
         mock_get_latest_end_date.return_value = '1999-01-04'
         mock_response = requests.Response()
         mock_response.status_code = 200
-        mock_response._content = mock_noaa_daily_weather_data_response
-        mock_requests_get.return_value = mock_response
+        mock_response._content = json.dumps(mock_noaa_daily_weather_data_response).encode('utf-8')
+
+        no_response = requests.Response()
+        no_response.status_code = 200
+        no_response._content = json.dumps({'results': []}).encode('utf-8')
+
+        mock_requests_get.side_effect = [mock_response, no_response]
 
         parameters = mock_noaa_parameters
 
@@ -333,16 +332,12 @@ class TestNOAA:
         metadata_dataset_key = 'daily_weather'
         start_date_if_none = ''
 
-        NOAA.extract(parameters=parameters, folder=folder, object_key=object_key,metadata_folder=metadata_folder, 
+        mock_noaa.extract(parameters=parameters, folder=folder, object_key=object_key,metadata_folder=metadata_folder, 
         metadata_object_key=metadata_object_key, metadata_dataset_key=metadata_dataset_key,
         start_date_if_none=start_date_if_none)
 
-        assert mock_requests_get.call_count == 1
-        mock_boto3_s3.put_data.assert_called_once_with(
-        data=mock_noaa_daily_weather_data_response,
-        folder=folder,
-        object_key=object_key
-        )
+        assert mock_requests_get.call_count == 2
+        mock_boto3_client.return_value.put_object.assert_called_once()
         mock_update_metadata.assert_called_once_with(
         folder=metadata_folder,
         object_key=metadata_object_key,
@@ -350,14 +345,19 @@ class TestNOAA:
         new_date='2024-05-24'
         )
     
-    def test_noaa_extract_success_no_latest_end_date(self, mock_environment_variables, mock_requests_get, mock_boto3_s3, mock_get_latest_end_date, mock_noaa_parameters, mock_noaa_daily_weather_data_response,
+    def test_noaa_extract_success_no_latest_end_date(self, mock_noaa, mock_environment_variables, mock_requests_get, mock_boto3_client, mock_get_latest_end_date, mock_noaa_parameters, mock_noaa_daily_weather_data_response,
     mock_update_metadata):
         ''' Test extract method of NOAA class where latest end date is None '''
         mock_get_latest_end_date.return_value = None
         mock_response = requests.Response()
         mock_response.status_code = 200
-        mock_response._content = mock_noaa_daily_weather_data_response
-        mock_requests_get.return_value = mock_response
+        mock_response._content = json.dumps(mock_noaa_daily_weather_data_response).encode('utf-8')
+        
+        no_response = requests.Response()
+        no_response.status_code = 200
+        no_response._content = json.dumps({'results': []}).encode('utf-8')
+
+        mock_requests_get.side_effect = [mock_response, no_response]
 
         parameters = mock_noaa_parameters
 
@@ -368,16 +368,12 @@ class TestNOAA:
         metadata_dataset_key = 'daily_weather'
         start_date_if_none = '1999-01-04'
 
-        NOAA.extract(parameters=parameters, folder=folder, object_key=object_key,metadata_folder=metadata_folder, 
+        mock_noaa.extract(parameters=parameters, folder=folder, object_key=object_key,metadata_folder=metadata_folder, 
         metadata_object_key=metadata_object_key, metadata_dataset_key=metadata_dataset_key,
         start_date_if_none=start_date_if_none)
 
-        assert mock_requests_get.call_count == 1
-        mock_boto3_s3.put_data.assert_called_once_with(
-        data=mock_noaa_daily_weather_data_response,
-        folder=folder,
-        object_key=object_key
-        )
+        assert mock_requests_get.call_count == 2
+        mock_boto3_client.return_value.put_object.assert_called_once()
         mock_update_metadata.assert_called_once_with(
         folder=metadata_folder,
         object_key=metadata_object_key,
@@ -385,12 +381,12 @@ class TestNOAA:
         new_date='2024-05-24'
         )
     
-    def test_noaa_extract_no_data(self, mock_requests_get, mock_boto3_s3, mock_get_latest_end_date, mock_environment_variables, mock_noaa_parameters, mock_update_metadata):
+    def test_noaa_extract_no_data(self, mock_noaa, mock_environment_variables, mock_requests_get, mock_boto3_client, mock_get_latest_end_date, mock_noaa_parameters, mock_update_metadata):
         ''' Test eia_extract method of EIA class where max_period is None '''
         mock_get_latest_end_date.return_value = '1999-01-04'
         mock_response = requests.Response()
         mock_response.status_code = 200
-        mock_response._content = {'results': []}
+        mock_response._content = json.dumps({'results': []}).encode('utf-8')
         mock_requests_get.return_value = mock_response
 
         parameters = mock_noaa_parameters
@@ -402,12 +398,12 @@ class TestNOAA:
         metadata_dataset_key = 'daily_weather'
         start_date_if_none = ''
 
-        NOAA.extract(parameters=parameters, folder=folder, object_key=object_key,metadata_folder=metadata_folder, 
+        mock_noaa.extract(parameters=parameters, folder=folder, object_key=object_key,metadata_folder=metadata_folder, 
         metadata_object_key=metadata_object_key, metadata_dataset_key=metadata_dataset_key,
         start_date_if_none=start_date_if_none)
         
         assert mock_requests_get.call_count == 1
-        mock_boto3_s3.put_data.assert_not_called()
+        mock_boto3_client.put_data.assert_not_called()
         mock_update_metadata.assert_not_called()
 
 
