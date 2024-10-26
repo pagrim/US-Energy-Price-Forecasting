@@ -314,7 +314,9 @@ class TestEiaTransformation:
         'price_2day_lag ($/MMBTU)': [None, None, 2.1, 2.05, 2.04, 1.91, 1.9, 1.83, 1.82, 1.87, 1.77, 1.78, 1.77, 1.81, 1.85, 1.82, 1.76, 1.73, 1.75, 1.75, 1.83, 1.75, 1.78, 1.8, 1.79, 1.81, 1.81, 1.82, 1.8, 1.78, 1.82, 1.79, 1.79, 1.8, 1.79, 1.77, 1.75, 1.73, 1.64, 1.63, 1.65, 1.67, 1.68, 1.72, 1.74, 1.87, 1.86, 1.94, 1.87, 1.81, 1.75, 1.75, 1.75, 1.75, 1.73, 1.74, 1.8, 1.79, 1.8, 1.83, 1.8, 1.89],
         'price_3day_lag ($/MMBTU)': [None, None, None, 2.1, 2.05, 2.04, 1.91, 1.9, 1.83, 1.82, 1.87, 1.77, 1.78, 1.77, 1.81, 1.85, 1.82, 1.76, 1.73, 1.75, 1.75, 1.83, 1.75, 1.78, 1.8, 1.79, 1.81, 1.81, 1.82, 1.8, 1.78, 1.82, 1.79, 1.79, 1.8, 1.79, 1.77, 1.75, 1.73, 1.64, 1.63, 1.65, 1.67, 1.68, 1.72, 1.74, 1.87, 1.86, 1.94, 1.87, 1.81, 1.75, 1.75, 1.75, 1.75, 1.73, 1.74, 1.8, 1.79, 1.8, 1.83, 1.8]}
         expected_df = pd.DataFrame(data)
-        result_df = EiaTransformation.impute_null_monthly_variable(df=df_eia_feature_engineering_testing)
+        expected_df['date'] = pd.to_datetime(expected_df['date'])
+        expected_df = expected_df.set_index('date')
+        result_df = EiaTransformation.natural_gas_prices_lag(df=df_eia_feature_engineering_testing)
         pd.testing.assert_frame_equal(result_df, expected_df)
     
     def test_heating_oil_to_natural_gas_price_ratio(self, df_eia_feature_engineering_testing):
@@ -336,6 +338,8 @@ class TestEiaTransformation:
         'total_underground_storage': [6404470.0, 6404470.0, 6404470.0, 6404470.0, 6404470.0, 6404470.0, 6404470.0, 6404470.0, 6404470.0, 6404470.0, 6404470.0, 6404470.0, 6404470.0, 6404470.0, 6404470.0, 6404470.0, 6404470.0, 6404470.0, 6404470.0, 6074901.0, 6074901.0, 6074901.0, 6074901.0, 6074901.0, 6074901.0, 6074901.0, 6074901.0, 6074901.0, 6074901.0, 6074901.0, 6074901.0, 6074901.0, 6074901.0, 6074901.0, 6074901.0, 6074901.0, 6074901.0, 6074901.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5876197.0],
         'heating_oil_natural_gas_price_ratio' : [0.16, 0.16, 0.17, 0.18, 0.19, 0.2, 0.19, 0.18, 0.18, 0.18, 0.18, 0.17, 0.17, 0.18, 0.18, 0.18, 0.19, 0.19, 0.18, 0.18, 0.18, 0.18, 0.17, 0.17, 0.16, 0.16, 0.16, 0.17, 0.16, 0.16, 0.16, 0.17, 0.16, 0.17, 0.18, 0.19, 0.2, 0.2, 0.19, 0.19, 0.2, 0.2, 0.2, 0.19, 0.19, 0.2, 0.2, 0.21, 0.22, 0.22, 0.23, 0.23, 0.24, 0.23, 0.23, 0.23, 0.23, 0.24, 0.24, 0.24, 0.22, 0.22]}
         expected_df = pd.DataFrame(data)
+        expected_df['date'] = pd.to_datetime(expected_df['date'])
+        expected_df = expected_df.set_index('date')
         result_df = EiaTransformation.heating_oil_to_natural_gas_price_ratio(df=df_eia_feature_engineering_testing)
         pd.testing.assert_frame_equal(result_df, expected_df)
     
@@ -361,6 +365,8 @@ class TestEiaTransformation:
         '30day_ew_volatility price ($/MMBTU)': [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, 0.06, 0.06, 0.06, 0.05, 0.05, 0.05, 0.05, 0.07, 0.07, 0.08, 0.08, 0.08, 0.08, 0.07, 0.08, 0.08, 0.09, 0.09, 0.09, 0.08, 0.08, 0.08, 0.08, 0.08, 0.07, 0.07, 0.07, 0.07, 0.07, 0.06, 0.07, 0.09, 0.09],
         '60day_ew_volatility price ($/MMBTU)': [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, 0.07, 0.09, 0.09]}
         expected_df = pd.DataFrame(data)
+        expected_df['date'] = pd.to_datetime(expected_df['date'])
+        expected_df = expected_df.set_index('date')
         result_df = EiaTransformation.expotential_weighted_natural_gas_price_volatility(df=df_eia_feature_engineering_testing)
         pd.testing.assert_frame_equal(result_df, expected_df)
     
@@ -385,6 +391,8 @@ class TestEiaTransformation:
         '14day_rolling_average price ($/MMBTU)': [None, None, None, None, None, None, None, None, None, None, None, None, None, 1.88, 1.86, 1.83, 1.81, 1.8, 1.8, 1.79, 1.79, 1.78, 1.78, 1.79, 1.79, 1.79, 1.79, 1.78, 1.79, 1.79, 1.79, 1.8, 1.8, 1.8, 1.79, 1.79, 1.78, 1.77, 1.75, 1.74, 1.74, 1.73, 1.72, 1.73, 1.74, 1.75, 1.75, 1.75, 1.75, 1.76, 1.76, 1.77, 1.78, 1.78, 1.79, 1.8, 1.8, 1.8, 1.79, 1.79, 1.8, 1.81],
         '30day_rolling_average price ($/MMBTU)': [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, 1.83, 1.82, 1.81, 1.8, 1.8, 1.79, 1.79, 1.78, 1.78, 1.77, 1.77, 1.76, 1.76, 1.76, 1.76, 1.76, 1.77, 1.77, 1.78, 1.77, 1.77, 1.77, 1.77, 1.77, 1.77, 1.77, 1.77, 1.77, 1.77, 1.77, 1.77, 1.78, 1.78]}
         expected_df = pd.DataFrame(data)
+        expected_df['date'] = pd.to_datetime(expected_df['date'])
+        expected_df = expected_df.set_index('date')
         result_df = EiaTransformation.rolling_average_natural_gas_price(df=df_eia_feature_engineering_testing)
         pd.testing.assert_frame_equal(result_df, expected_df)
     
@@ -406,9 +414,11 @@ class TestEiaTransformation:
         'commercial_consumption': [475945.0, 475945.0, 475945.0, 475945.0, 475945.0, 475945.0, 475945.0, 475945.0, 475945.0, 475945.0, 475945.0, 475945.0, 475945.0, 475945.0, 475945.0, 475945.0, 475945.0, 475945.0, 475945.0, 400207.0, 400207.0, 400207.0, 400207.0, 400207.0, 400207.0, 400207.0, 400207.0, 400207.0, 400207.0, 400207.0, 400207.0, 400207.0, 400207.0, 400207.0, 400207.0, 400207.0, 400207.0, 400207.0, 388912.0, 388912.0, 388912.0, 388912.0, 388912.0, 388912.0, 388912.0, 388912.0, 388912.0, 388912.0, 388912.0, 388912.0, 388912.0, 388912.0, 388912.0, 388912.0, 388912.0, 388912.0, 388912.0, 388912.0, 388912.0, 388912.0, 388912.0, 259432.0],
         'total_underground_storage': [6404470.0, 6404470.0, 6404470.0, 6404470.0, 6404470.0, 6404470.0, 6404470.0, 6404470.0, 6404470.0, 6404470.0, 6404470.0, 6404470.0, 6404470.0, 6404470.0, 6404470.0, 6404470.0, 6404470.0, 6404470.0, 6404470.0, 6074901.0, 6074901.0, 6074901.0, 6074901.0, 6074901.0, 6074901.0, 6074901.0, 6074901.0, 6074901.0, 6074901.0, 6074901.0, 6074901.0, 6074901.0, 6074901.0, 6074901.0, 6074901.0, 6074901.0, 6074901.0, 6074901.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5876197.0],
         '7day_rolling_median price ($/MMBTU)': [None, None, None, None, None, None, 1.91, 1.9, 1.87, 1.83, 1.82, 1.81, 1.81, 1.81, 1.78, 1.78, 1.77, 1.76, 1.76, 1.75, 1.75, 1.75, 1.78, 1.79, 1.8, 1.8, 1.8, 1.8, 1.81, 1.81, 1.8, 1.8, 1.79, 1.79, 1.79, 1.79, 1.77, 1.75, 1.73, 1.67, 1.67, 1.67, 1.67, 1.68, 1.72, 1.74, 1.86, 1.86, 1.86, 1.86, 1.81, 1.75, 1.75, 1.75, 1.75, 1.75, 1.75, 1.79, 1.8, 1.8, 1.8, 1.83],
-        '14day_rolling_median price ($/MMBTU)': [None, None, None, None, None, None, None, None, None, None, None, None, None, 1.84, 1.8250000000000002, 1.82, 1.815, 1.795, 1.795, 1.775, 1.775, 1.775, 1.78, 1.7850000000000001, 1.795, 1.795, 1.795, 1.7850000000000001, 1.795, 1.795, 1.795, 1.8, 1.795, 1.795, 1.795, 1.79, 1.79, 1.79, 1.7850000000000001, 1.775, 1.76, 1.74, 1.7349999999999999, 1.7349999999999999, 1.7349999999999999, 1.7349999999999999, 1.7349999999999999, 1.7349999999999999, 1.7349999999999999, 1.745, 1.75, 1.75, 1.75, 1.75, 1.75, 1.77, 1.795, 1.795, 1.795, 1.795, 1.795, 1.795],
-        '30day_rolling_median price ($/MMBTU)': [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, 1.81, 1.8050000000000002, 1.8, 1.8, 1.795, 1.79, 1.79, 1.79, 1.7850000000000001, 1.7850000000000001, 1.7850000000000001, 1.7850000000000001, 1.78, 1.775, 1.775, 1.78, 1.7850000000000001, 1.79, 1.79, 1.79, 1.79, 1.79, 1.7850000000000001, 1.775, 1.76, 1.76, 1.76, 1.76, 1.76, 1.76, 1.76, 1.76, 1.76]}
+        '14day_rolling_median price ($/MMBTU)': [None, None, None, None, None, None, None, None, None, None, None, None, None, 1.84, 1.83, 1.82, 1.82, 1.80, 1.80, 1.78, 1.78, 1.78, 1.78, 1.78, 1.80, 1.80, 1.80, 1.78, 1.80, 1.80, 1.80, 1.80, 1.80, 1.80, 1.80, 1.79, 1.79, 1.79, 1.78, 1.78, 1.76, 1.74, 1.74, 1.74, 1.74, 1.74, 1.74, 1.74, 1.74, 1.74, 1.75, 1.75, 1.75, 1.75, 1.75, 1.77, 1.80, 1.80, 1.80, 1.80, 1.80, 1.80],
+        '30day_rolling_median price ($/MMBTU)': [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, 1.81, 1.81, 1.8, 1.8, 1.80, 1.79, 1.79, 1.79, 1.78, 1.78, 1.78, 1.78, 1.78, 1.78, 1.78, 1.78, 1.78, 1.79, 1.79, 1.79, 1.79, 1.79, 1.78, 1.78, 1.76, 1.76, 1.76, 1.76, 1.76, 1.76, 1.76, 1.76, 1.76]}
         expected_df = pd.DataFrame(data)
+        expected_df['date'] = pd.to_datetime(expected_df['date'])
+        expected_df = expected_df.set_index('date')
         result_df = EiaTransformation.rolling_median_natural_gas_price(df=df_eia_feature_engineering_testing)
         pd.testing.assert_frame_equal(result_df, expected_df)
     
@@ -431,6 +441,8 @@ class TestEiaTransformation:
         'total_underground_storage': [6404470.0, 6404470.0, 6404470.0, 6404470.0, 6404470.0, 6404470.0, 6404470.0, 6404470.0, 6404470.0, 6404470.0, 6404470.0, 6404470.0, 6404470.0, 6404470.0, 6404470.0, 6404470.0, 6404470.0, 6404470.0, 6404470.0, 6074901.0, 6074901.0, 6074901.0, 6074901.0, 6074901.0, 6074901.0, 6074901.0, 6074901.0, 6074901.0, 6074901.0, 6074901.0, 6074901.0, 6074901.0, 6074901.0, 6074901.0, 6074901.0, 6074901.0, 6074901.0, 6074901.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5876197.0],
         'total_consumption_total_underground_storage_ratio': [0.22, 0.22, 0.22, 0.22, 0.22, 0.22, 0.22, 0.22, 0.22, 0.22, 0.22, 0.22, 0.22, 0.22, 0.22, 0.22, 0.22, 0.22, 0.22, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.12]}
         expected_df = pd.DataFrame(data)
+        expected_df['date'] = pd.to_datetime(expected_df['date'])
+        expected_df = expected_df.set_index('date')
         result_df = EiaTransformation.total_consumption_to_total_underground_storage_ratio(df=df_eia_feature_engineering_testing)
         pd.testing.assert_frame_equal(result_df, expected_df)
     
@@ -453,7 +465,9 @@ class TestEiaTransformation:
         'total_underground_storage': [6404470.0, 6404470.0, 6404470.0, 6404470.0, 6404470.0, 6404470.0, 6404470.0, 6404470.0, 6404470.0, 6404470.0, 6404470.0, 6404470.0, 6404470.0, 6404470.0, 6404470.0, 6404470.0, 6404470.0, 6404470.0, 6404470.0, 6074901.0, 6074901.0, 6074901.0, 6074901.0, 6074901.0, 6074901.0, 6074901.0, 6074901.0, 6074901.0, 6074901.0, 6074901.0, 6074901.0, 6074901.0, 6074901.0, 6074901.0, 6074901.0, 6074901.0, 6074901.0, 6074901.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5788960.0, 5876197.0],
         'is_dec_or_jan': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}
         expected_df = pd.DataFrame(data)
-        result_df = EiaTransformation.total_consumption_to_total_underground_storage_ratio(df=df_eia_feature_engineering_testing)
+        expected_df['date'] = pd.to_datetime(expected_df['date'])
+        expected_df = expected_df.set_index('date')
+        result_df = EiaTransformation.is_december_or_january(df=df_eia_feature_engineering_testing)
         pd.testing.assert_frame_equal(result_df, expected_df)
     
     
