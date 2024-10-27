@@ -54,7 +54,7 @@ class EtlTransforms:
         Returns:
             pd.DataFrame: Returns json data as a dataframe
         '''
-        json_data = next(data)
+        json_data = json.loads(data)
         df = pd.DataFrame(json_data)
         return df
     
@@ -130,7 +130,7 @@ class EtlTransforms:
         Returns:
             pd.DataFrame: Dataframe with pivoted columns
         '''
-        df = df.pivot(index=index, columns=column, values=value).reset_index()
+        df = df.pivot_table(index=index, columns=column, values=value).reset_index()
         df.columns.name = None
         return df
     
@@ -191,6 +191,7 @@ class EtlTransforms:
         df = pd.merge(spot_prices_merged_df, monthly_variables_merged_df, on='year_month', how='left')
         df = df.drop(columns=['year_month', 'date_y'], axis=1)
         df = df.set_index('date_x')
+        df.index.name = 'date'
         df = pd.merge(df, daily_weather_df, left_index=True, right_index=True)
         return df
     
@@ -206,7 +207,7 @@ class EtlTransforms:
         Returns:
             pd.DataFrame: Returns dataframe with columns with null values end of series forward filled
         '''
-        columns_to_ffill = ['residential_consumption', 'commerical_consumption', 'total_underground_storage'
+        columns_to_ffill = ['residential_consumption', 'commerical_consumption', 'total_underground_storage',
         'imports', 'lng_imports', 'natural_gas_rigs_in_operation', 'awnd', 'snow', 'tavg']
         
         for col in columns_to_ffill:
@@ -228,10 +229,10 @@ class EtlTransforms:
             pd.DataFrame: Returns dataframe with columns with null values at start of series back filled
         '''
         columns_to_backfill = ['7day_ew_volatility price ($/MMBTU)', '14day_ew_volatility price ($/MMBTU)', '30day_ew_volatility price ($/MMBTU)',
-        '60day_ew_volatility_price ($/MMBTU)', 'price_1day_lag ($/MMBTU)', 'price_2day_lag ($/MMBTU)', 'price_3day_lag ($/MMBTU)',
+        '60day_ew_volatility price ($/MMBTU)', 'price_1day_lag ($/MMBTU)', 'price_2day_lag ($/MMBTU)', 'price_3day_lag ($/MMBTU)',
         '7day_rolling_average price ($/MMBTU)', '14day_rolling_average price ($/MMBTU)', '30day_rolling_average price ($/MMBTU)', 
         '7day_rolling_median price ($/MMBTU)', '14day_rolling_median price ($/MMBTU)', '30day_rolling_median price ($/MMBTU)', 'max_abs_tavg_diff']
-        df[columns_to_backfill] = df[columns_to_backfill].fillna('bfill')
+        df[columns_to_backfill] = df[columns_to_backfill].fillna(method='bfill')
         return df
     
     @classmethod

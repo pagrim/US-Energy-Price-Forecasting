@@ -35,7 +35,7 @@ class TestEtlTransforms:
         data = [{'date': '1999-01-04', 'datatype': 'AWND', 'value': 4.3, 'city': 'Detroit', 'state': 'Michigan'},
         {'date': '1999-01-04', 'datatype': 'AWND', 'value': 4.3, 'city': 'Detroit', 'state': 'Michigan'},
         {'date': '1999-01-05', 'datatype': 'AWND', 'value': 4.2, 'city': 'Detroit', 'state': 'Michigan'},
-        {'date': '1999-01-06', 'datatype': 'AWND', 'value': None, 'city': 'Detroit', 'state': 'Michigan'}
+        {'date': '1999-01-06', 'datatype': 'AWND', 'value': None, 'city': 'Detroit', 'state': 'Michigan'},
         {'date': '2024-05-24', 'datatype': 'AWND', 'value': 4.0, 'city': 'Detroit', 'state': 'Michigan'}]
         expected_df = pd.DataFrame(data)
         result_df = EtlTransforms.drop_columns(df=df_etl_transforms_testing, columns=['station'])
@@ -46,11 +46,11 @@ class TestEtlTransforms:
         Tests rename_columns function from EtlUtils class
         '''
         renamed_columns = {'date': 'Date', 'datatype': 'DataType', 'station': 'Station', 'value': 'Value', 'city': 'City', 'state': 'State'}
-        data = [{'Date': '1999-01-04', 'Datatype': 'AWND', 'Station': 'GHCND:USW00094847', 'Value': 4.3, 'City':'Detroit', 'State': 'Michigan'},
-        {'Date': '1999-01-04', 'Datatype': 'AWND', 'Station': 'GHCND:USW00094847', 'Value': 4.3, 'City': 'Detroit', 'State': 'Michigan'},
-        {'Date': '1999-01-05', 'Datatype': 'AWND', 'Station': 'GHCND:USW00094847', 'Value': 4.2, 'City': 'Detroit', 'State': 'Michigan'},
-        {'Date': '1999-01-06', 'Datatype': 'AWND', 'Station': 'GHCND:USW00094847', 'Value': None, 'City': 'Detroit', 'State': 'Michigan'},
-        {'Date': '2024-05-24', 'Datatype': 'AWND', 'Station': 'GHCND:USW00094847', 'Value': 4.0, 'City': 'Detroit', 'State': 'Michigan'}]
+        data = [{'Date': '1999-01-04', 'DataType': 'AWND', 'Station': 'GHCND:USW00094847', 'Value': 4.3, 'City':'Detroit', 'State': 'Michigan'},
+        {'Date': '1999-01-04', 'DataType': 'AWND', 'Station': 'GHCND:USW00094847', 'Value': 4.3, 'City': 'Detroit', 'State': 'Michigan'},
+        {'Date': '1999-01-05', 'DataType': 'AWND', 'Station': 'GHCND:USW00094847', 'Value': 4.2, 'City': 'Detroit', 'State': 'Michigan'},
+        {'Date': '1999-01-06', 'DataType': 'AWND', 'Station': 'GHCND:USW00094847', 'Value': None, 'City': 'Detroit', 'State': 'Michigan'},
+        {'Date': '2024-05-24', 'DataType': 'AWND', 'Station': 'GHCND:USW00094847', 'Value': 4.0, 'City': 'Detroit', 'State': 'Michigan'}]
         expected_df = pd.DataFrame(data)
         result_df = EtlTransforms.rename_columns(df=df_etl_transforms_testing, renamed_columns=renamed_columns)
         pd.testing.assert_frame_equal(result_df, expected_df)
@@ -64,10 +64,8 @@ class TestEtlTransforms:
         value = 'value'
         data = [{'date': '1999-01-04', 'AWND': 4.3},
         {'date': '1999-01-05', 'AWND': 4.2},
-        {'date': '1999-01-06', 'AWND': None},
         {'date': '2024-05-24', 'AWND': 4.0}]
         expected_df = pd.DataFrame(data)
-        expected_df = expected_df.set_index('date')
         result_df = EtlTransforms.pivot_columns(df=df_etl_transforms_testing, index=index, column=column, value=value)
         pd.testing.assert_frame_equal(result_df, expected_df)
     
@@ -79,7 +77,9 @@ class TestEtlTransforms:
         {'date': '1999-01-04', 'datatype': 'AWND', 'station': 'GHCND:USW00094847', 'value': 4.3, 'city': 'Detroit', 'state': 'Michigan'},
         {'date': '1999-01-05', 'datatype': 'AWND', 'station': 'GHCND:USW00094847', 'value': 4.2, 'city': 'Detroit', 'state': 'Michigan'},
         {'date': '2024-05-24', 'datatype': 'AWND', 'station': 'GHCND:USW00094847', 'value': 4.0, 'city': 'Detroit', 'state': 'Michigan'}]
+        index = [0, 1, 2, 4]
         expected_df = pd.DataFrame(data)
+        expected_df.index = index
         result_df = EtlTransforms.drop_null(df=df_etl_transforms_testing)
         pd.testing.assert_frame_equal(result_df, expected_df)
     
@@ -87,14 +87,17 @@ class TestEtlTransforms:
         '''
         Tests set_date_index function of EtlUtils class
         '''
-        expected_df = df_etl_transforms_testing.set_index('date')
-        expected_index = pd.to_datetime(['1991-01-04', '1999-01-04', '1999-01-05', '1999-01-06', '2024-05-24'])
+        expected_df = df_etl_transforms_testing.copy()
+        expected_df['date'] = pd.to_datetime(expected_df['date'])
+        expected_df = expected_df.set_index('date')
+        expected_index = pd.to_datetime(['1999-01-04', '1999-01-04', '1999-01-05', '1999-01-06', '2024-05-24'])
+        expected_index.name = 'date'
         result_df = EtlTransforms.set_date_index(df=df_etl_transforms_testing)
         result_index = result_df.index
         pd.testing.assert_index_equal(result_index, expected_index)
         pd.testing.assert_frame_equal(result_df, expected_df)
     
-    def test_merge_dataframes_no_missing_dates_all_datasets(self, merge_dataframes_daily_weather_df_no_missing_date, merge_dataframes_natural_gas_monthly_variables_df_no_missing_date, 
+    def test_merge_dataframe_no_missing_dates_all_datasets(self, merge_dataframes_daily_weather_df_no_missing_date, merge_dataframes_natural_gas_monthly_variables_df_no_missing_date, 
     merge_dataframes_natural_gas_spot_prices_df_no_missing_date, 
     merge_dataframes_heating_oil_spot_prices_df_no_missing_date, merge_dataframes_natural_gas_rigs_in_operation_df_no_missing_date):
         '''
@@ -362,8 +365,8 @@ class TestEtlTransforms:
         expected_df['date'] = pd.to_datetime(expected_df['date'])
         expected_df = expected_df.set_index('date')
         result_df = EtlTransforms.merge_dataframes(daily_weather_df=merge_dataframes_daily_weather_df_no_missing_date, 
-        natural_gas_monthly_variables_df=merge_dataframes_natural_gas_monthly_variables_df_missing_date,
-        natural_gas_rigs_in_operation_df=merge_dataframes_natural_gas_rigs_in_operation_df_no_missing_date,
+        natural_gas_monthly_variables_df=merge_dataframes_natural_gas_monthly_variables_df_no_missing_date,
+        natural_gas_rigs_in_operation_df=merge_dataframes_natural_gas_rigs_in_operation_df_missing_date,
         natural_gas_spot_prices_df=merge_dataframes_natural_gas_spot_prices_df_no_missing_date,
         heating_oil_spot_prices_df=merge_dataframes_heating_oil_spot_prices_df_no_missing_date)
         pd.testing.assert_frame_equal(result_df, expected_df)
@@ -435,14 +438,15 @@ class TestEtlTransforms:
         '''
         data = {
         'date': ['1999-03-29', '1999-03-30', '1999-03-31', '1999-04-01'],
-        'imports': [1000, 1000, 1000, 1000],
-        'lng_imports': [20, 40, 60, 60],
+        'imports': [1000.0, 1000.0, 1000.0, 1000.0],
+        'lng_imports': [20.0, 40.0, 60.0, 60.0],
         'residential_consumption': [2.1, 2.05, 2.04, 2.04],
         'commerical_consumption': [475945.0, 475960.0, 475970.0, 475970.0],
         'total_underground_storage': [6404470.0, 6404480.0, 6404490.0, 6404490.0],
-        'awnd': [10, 5, 1, 1],
-        'snow': [5, 3, 0, 0],
-        'tavg': [0, 15, 17, 17]
+        'natural_gas_rigs_in_operation': [1000.0, 1000.0, 2000.0, 2000.0],
+        'awnd': [10.0, 5.0, 1.0, 1.0],
+        'snow': [5.0, 3.0, 0.0, 0.0],
+        'tavg': [0.0, 15.0, 17.0, 17.0]
         }
         expected_df = pd.DataFrame(data)
         expected_df['date'] = pd.to_datetime(expected_df['date'])
@@ -461,6 +465,7 @@ class TestEtlTransforms:
         'residential_consumption': [2.1, 2.05, 2.04, 2.06],
         'commerical_consumption': [475945.0, 475960.0, 475970.0, 475980.0],
         'total_underground_storage': [6404470.0, 6404480.0, 6404490.0, 6404590.0],
+        'natural_gas_rigs_in_operation': [1000, 1000, 2000, 2000],
         'awnd': [10, 5, 1, 2],
         'snow': [5, 3, 0, 3],
         'tavg': [0, 15, 17, 10]
@@ -473,9 +478,15 @@ class TestEtlTransforms:
     
     def test_backfill_null_values_start_of_series_with_empty_values(self, df_backfill_null_values_start_of_series_with_empty_values):
         '''
-        Tests forwardfill_null_values_end_of_series function of EtlUtils class where dataframe contains no empty values end of series
+        Tests backfill_null_values_end_of_series function of EtlTransforms class where dataframe contains empty values end of series
         '''
         data = {
+        'date': ['1999-03-01', '1999-03-02', '1999-03-03', '1999-03-04', '1999-03-05', '1999-03-06', '1999-03-07', '1999-03-08', '1999-03-09', '1999-03-10', '1999-03-11',
+        '1999-03-12', '1999-03-13', '1999-03-14', '1999-03-15', '1999-03-16', '1999-03-17', '1999-03-18', '1999-03-19', '1999-03-20', '1999-03-21', '1999-03-22', '1999-03-23',
+        '1999-03-24', '1999-03-25', '1999-03-26', '1999-03-27', '1999-03-28', '1999-03-29', '1999-03-30', '1999-03-31', '1999-04-01', '1999-04-02', '1999-04-03', '1999-04-04', 
+        '1999-04-05', '1999-04-06', '1999-04-07', '1999-04-08', '1999-04-09', '1999-04-10', '1999-04-11', '1999-04-12', '1999-04-13', '1999-04-14', '1999-04-15', '1999-04-16',
+        '1999-04-17', '1999-04-18', '1999-04-19', '1999-04-20', '1999-04-21', '1999-04-22', '1999-04-23', '1999-04-24', '1999-04-25', '1999-04-26', '1999-04-27', '1999-04-28', '1999-04-29',
+        '1999-04-30', '1999-05-01'],
         'price_1day_lag ($/MMBTU)': [2.1, 2.1, 2.05, 2.04, 1.91, 1.9, 1.83, 1.82, 1.87, 1.77, 1.78, 1.77, 1.81, 1.85, 1.82, 1.76, 1.73, 1.75, 1.75, 1.83, 1.75, 1.78, 1.8, 1.79, 1.81, 1.81, 1.82, 1.8, 1.78, 1.82, 1.79, 1.79, 1.8, 1.79, 1.77, 1.75, 1.73, 1.64, 1.63, 1.65, 1.67, 1.68, 1.72, 1.74, 1.87, 1.86, 1.94, 1.87, 1.81, 1.75, 1.75, 1.75, 1.75, 1.73, 1.74, 1.8, 1.79, 1.8, 1.83, 1.8, 1.89, 2.02],
         'price_2day_lag ($/MMBTU)': [2.1, 2.1, 2.1, 2.05, 2.04, 1.91, 1.9, 1.83, 1.82, 1.87, 1.77, 1.78, 1.77, 1.81, 1.85, 1.82, 1.76, 1.73, 1.75, 1.75, 1.83, 1.75, 1.78, 1.8, 1.79, 1.81, 1.81, 1.82, 1.8, 1.78, 1.82, 1.79, 1.79, 1.8, 1.79, 1.77, 1.75, 1.73, 1.64, 1.63, 1.65, 1.67, 1.68, 1.72, 1.74, 1.87, 1.86, 1.94, 1.87, 1.81, 1.75, 1.75, 1.75, 1.75, 1.73, 1.74, 1.8, 1.79, 1.8, 1.83, 1.8, 1.89],
         'price_3day_lag ($/MMBTU)': [2.1, 2.1, 2.1, 2.1, 2.05, 2.04, 1.91, 1.9, 1.83, 1.82, 1.87, 1.77, 1.78, 1.77, 1.81, 1.85, 1.82, 1.76, 1.73, 1.75, 1.75, 1.83, 1.75, 1.78, 1.8, 1.79, 1.81, 1.81, 1.82, 1.8, 1.78, 1.82, 1.79, 1.79, 1.8, 1.79, 1.77, 1.75, 1.73, 1.64, 1.63, 1.65, 1.67, 1.68, 1.72, 1.74, 1.87, 1.86, 1.94, 1.87, 1.81, 1.75, 1.75, 1.75, 1.75, 1.73, 1.74, 1.8, 1.79, 1.8, 1.83, 1.8],
@@ -489,7 +500,7 @@ class TestEtlTransforms:
         '7day_rolling_median price ($/MMBTU)': [1.91, 1.91, 1.91, 1.91, 1.91, 1.91, 1.91, 1.9, 1.87, 1.83, 1.82, 1.81, 1.81, 1.81, 1.78, 1.78, 1.77, 1.76, 1.76, 1.75, 1.75, 1.75, 1.78, 1.79, 1.8, 1.8, 1.8, 1.8, 1.81, 1.81, 1.8, 1.8, 1.79, 1.79, 1.79, 1.79, 1.77, 1.75, 1.73, 1.67, 1.67, 1.67, 1.67, 1.68, 1.72, 1.74, 1.86, 1.86, 1.86, 1.86, 1.81, 1.75, 1.75, 1.75, 1.75, 1.75, 1.75, 1.79, 1.8, 1.8, 1.8, 1.83],
         '14day_rolling_median price ($/MMBTU)': [1.84, 1.84, 1.84, 1.84, 1.84, 1.84, 1.84, 1.84, 1.84, 1.84, 1.84, 1.84, 1.84, 1.84, 1.83, 1.82, 1.82, 1.80, 1.80, 1.78, 1.78, 1.78, 1.78, 1.79, 1.80, 1.80, 1.80, 1.79, 1.80, 1.80, 1.80, 1.8, 1.80, 1.80, 1.80, 1.79, 1.79, 1.79, 1.79, 1.78, 1.76, 1.74, 1.73, 1.73, 1.73, 1.73, 1.73, 1.73, 1.73, 1.745, 1.75, 1.75, 1.75, 1.75, 1.75, 1.77, 1.80, 1.80, 1.80, 1.80, 1.80, 1.80],
         '30day_rolling_median price ($/MMBTU)': [1.81, 1.81, 1.81, 1.81, 1.81, 1.81, 1.81, 1.81, 1.81, 1.81, 1.81, 1.81, 1.81, 1.81, 1.81, 1.81, 1.81, 1.81, 1.81, 1.81, 1.81, 1.81, 1.81, 1.81, 1.81, 1.81, 1.81, 1.81, 1.81, 1.81, 1.81, 1.8, 1.8, 1.80, 1.79, 1.79, 1.79, 1.79, 1.70, 1.79, 1.79, 1.78, 1.78, 1.78, 1.78, 1.79, 1.79, 1.79, 1.79, 1.79, 1.79, 1.79, 1.78, 1.76, 1.76, 1.76, 1.76, 1.76, 1.76, 1.76, 1.76, 1.76],
-        'max_abs_tavg_diff': [2, 2, 2, 2, 2, 2, 17, 17, 17, 1, 1, 1, 13, 13, 13, 19, 19, 19, 15, 15, 15, 19, 19, 19, 5, 5, 5, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
+        'max_abs_tavg_diff': [2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 17, 17, 17, 1, 1, 1, 13, 13, 13, 19, 19, 19, 15, 15, 15, 19, 19, 19, 5, 5, 5, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
         }
         expected_df = pd.DataFrame(data)
         expected_df['date'] = pd.to_datetime(expected_df['date'])
@@ -498,10 +509,19 @@ class TestEtlTransforms:
         pd.testing.assert_frame_equal(result_df, expected_df)
     
     def test_backfill_null_values_start_of_series_no_empty_values(self, df_backfill_null_values_start_of_series_no_empty_values):
+        '''
+        Tests backfill_null_values_end_of_series function of EtlTransforms class where dataframe contains no empty values end of series
+        '''
         data = {
+        'date': ['1999-03-01', '1999-03-02', '1999-03-03', '1999-03-04', '1999-03-05', '1999-03-06', '1999-03-07', '1999-03-08', '1999-03-09', '1999-03-10', '1999-03-11',
+        '1999-03-12', '1999-03-13', '1999-03-14', '1999-03-15', '1999-03-16', '1999-03-17', '1999-03-18', '1999-03-19', '1999-03-20', '1999-03-21', '1999-03-22', '1999-03-23',
+        '1999-03-24', '1999-03-25', '1999-03-26', '1999-03-27', '1999-03-28', '1999-03-29', '1999-03-30', '1999-03-31', '1999-04-01', '1999-04-02', '1999-04-03', '1999-04-04', 
+        '1999-04-05', '1999-04-06', '1999-04-07', '1999-04-08', '1999-04-09', '1999-04-10', '1999-04-11', '1999-04-12', '1999-04-13', '1999-04-14', '1999-04-15', '1999-04-16',
+        '1999-04-17', '1999-04-18', '1999-04-19', '1999-04-20', '1999-04-21', '1999-04-22', '1999-04-23', '1999-04-24', '1999-04-25', '1999-04-26', '1999-04-27', '1999-04-28', '1999-04-29',
+        '1999-04-30', '1999-05-01'],
         'price_1day_lag ($/MMBTU)': [0, 2.1, 2.05, 2.04, 1.91, 1.9, 1.83, 1.82, 1.87, 1.77, 1.78, 1.77, 1.81, 1.85, 1.82, 1.76, 1.73, 1.75, 1.75, 1.83, 1.75, 1.78, 1.8, 1.79, 1.81, 1.81, 1.82, 1.8, 1.78, 1.82, 1.79, 1.79, 1.8, 1.79, 1.77, 1.75, 1.73, 1.64, 1.63, 1.65, 1.67, 1.68, 1.72, 1.74, 1.87, 1.86, 1.94, 1.87, 1.81, 1.75, 1.75, 1.75, 1.75, 1.73, 1.74, 1.8, 1.79, 1.8, 1.83, 1.8, 1.89, 2.02],
         'price_2day_lag ($/MMBTU)': [0, 0, 2.1, 2.05, 2.04, 1.91, 1.9, 1.83, 1.82, 1.87, 1.77, 1.78, 1.77, 1.81, 1.85, 1.82, 1.76, 1.73, 1.75, 1.75, 1.83, 1.75, 1.78, 1.8, 1.79, 1.81, 1.81, 1.82, 1.8, 1.78, 1.82, 1.79, 1.79, 1.8, 1.79, 1.77, 1.75, 1.73, 1.64, 1.63, 1.65, 1.67, 1.68, 1.72, 1.74, 1.87, 1.86, 1.94, 1.87, 1.81, 1.75, 1.75, 1.75, 1.75, 1.73, 1.74, 1.8, 1.79, 1.8, 1.83, 1.8, 1.89],
-        'price_3day_lag ($/MMBTU)': [0, 0, 2.1, 2.05, 2.04, 1.91, 1.9, 1.83, 1.82, 1.87, 1.77, 1.78, 1.77, 1.81, 1.85, 1.82, 1.76, 1.73, 1.75, 1.75, 1.83, 1.75, 1.78, 1.8, 1.79, 1.81, 1.81, 1.82, 1.8, 1.78, 1.82, 1.79, 1.79, 1.8, 1.79, 1.77, 1.75, 1.73, 1.64, 1.63, 1.65, 1.67, 1.68, 1.72, 1.74, 1.87, 1.86, 1.94, 1.87, 1.81, 1.75, 1.75, 1.75, 1.75, 1.73, 1.74, 1.8, 1.79, 1.8, 1.83, 1.8],
+        'price_3day_lag ($/MMBTU)': [0, 0, 0, 2.1, 2.05, 2.04, 1.91, 1.9, 1.83, 1.82, 1.87, 1.77, 1.78, 1.77, 1.81, 1.85, 1.82, 1.76, 1.73, 1.75, 1.75, 1.83, 1.75, 1.78, 1.8, 1.79, 1.81, 1.81, 1.82, 1.8, 1.78, 1.82, 1.79, 1.79, 1.8, 1.79, 1.77, 1.75, 1.73, 1.64, 1.63, 1.65, 1.67, 1.68, 1.72, 1.74, 1.87, 1.86, 1.94, 1.87, 1.81, 1.75, 1.75, 1.75, 1.75, 1.73, 1.74, 1.8, 1.79, 1.8, 1.83, 1.8],
         '7day_ew_volatility price ($/MMBTU)': [0, 0, 0, 0, 0, 0, 0.1, 0.09, 0.09, 0.09, 0.08, 0.07, 0.06, 0.05, 0.06, 0.06, 0.06, 0.05, 0.05, 0.05, 0.04, 0.04, 0.03, 0.03, 0.03, 0.03, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.01, 0.02, 0.02, 0.03, 0.07, 0.07, 0.07, 0.06, 0.05, 0.05, 0.05, 0.09, 0.09, 0.11, 0.1, 0.09, 0.08, 0.08, 0.07, 0.06, 0.06, 0.05, 0.05, 0.04, 0.04, 0.04, 0.04, 0.05, 0.11, 0.1],
         '14day_ew_volatility price ($/MMBTU)': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.08, 0.08, 0.08, 0.08, 0.08, 0.07, 0.07, 0.06, 0.06, 0.06, 0.05, 0.05, 0.05, 0.04, 0.04, 0.04, 0.04, 0.03, 0.03, 0.03, 0.03, 0.03, 0.04, 0.06, 0.07, 0.07, 0.07, 0.07, 0.06, 0.06, 0.08, 0.08, 0.1, 0.1, 0.09, 0.09, 0.08, 0.08, 0.07, 0.07, 0.07, 0.06, 0.06, 0.06, 0.06, 0.05, 0.06, 0.1, 0.1],
         '30day_ew_volatility price ($/MMBTU)': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.06, 0.06, 0.06, 0.05, 0.05, 0.05, 0.05, 0.07, 0.07, 0.08, 0.08, 0.08, 0.08, 0.07, 0.08, 0.08, 0.09, 0.09, 0.09, 0.08, 0.08, 0.08, 0.08, 0.08, 0.07, 0.07, 0.07, 0.07, 0.07, 0.06, 0.07, 0.09, 0.09],
@@ -521,6 +541,7 @@ class TestEtlTransforms:
         pd.testing.assert_frame_equal(result_df, expected_df)
     
     def test_create_test_data(self, merged_df):
+        ''' Tests create_test_data function of EtlTransforms class '''
         data = {
         'date': ['1999-03-31', '1999-04-01'],
         'imports': [1000, 2000],
@@ -556,6 +577,7 @@ class TestEtlTransforms:
         pd.testing.assert_frame_equal(result_df, expected_df)
     
     def test_create_sequences(self):
+        ''' Tests create_sequences function of EtlTransforms class '''
         x_train = {
         'date': ['1999-03-29', '1999-03-30', '1999-03-31', '1999-04-01'],
         'imports': [1000, 1000, 1000, 2000],
@@ -617,6 +639,7 @@ class TestEtlTransforms:
         np.testing.assert_array_equal(y_sequences, expected_y_sequence)
     
     def test_normalisation(self):
+        ''' Tests normalisation function of EtlTransforms class '''
         x_train = {
         'date': ['1999-03-29', '1999-03-30', '1999-03-31', '1999-04-01'],
         'imports': [1000, 1000, 1000, 2000],
