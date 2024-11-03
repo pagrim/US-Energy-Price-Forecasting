@@ -3,7 +3,8 @@ import pytest
 import pandas as pd
 from transformation.noaa_api_transformation import *
 from transformation.eia_api_transformation import *
-from fixtures.fixtures import df_noaa_transformation_testing, df_noaa_transformation_testing_impute_missing_weather_variables, df_noaa_feature_engineering_testing, df_eia_feature_engineering_testing
+from fixtures.fixtures import df_noaa_transformation_testing, df_noaa_transformation_testing_impute_missing_weather_variables, df_noaa_feature_engineering_testing, \
+df_convert_price_to_float, df_eia_feature_engineering_testing
 
 class TestNoaaTransformation:
     ''' 
@@ -293,6 +294,25 @@ class TestEiaTransformation:
     ''' 
     Test class for testing EiaTransformation class 
     '''
+    def test_convert_price_to_float(self, df_convert_price_to_float):
+        '''
+        Tests convert_price_to_float function of EiaTransformation class
+        '''
+        data = {'period': ['1999-01', '1999-02', '1999-03', '1999-04'],
+        'duoarea': ['NUS-Z00', 'NUS-Z00', 'NUS-Z00', 'NUS-Z00'],
+        'area-name': ['US.', 'US.', 'US.', 'US.'],
+        'product': ['EPG0', 'EPG0', 'EPG0', 'EPG0'],
+        'product-name': ['Natural Gas', 'Natural Gas', 'Natural Gas', 'Natural Gas'],
+        'process': ['PML', 'PML', 'PML', 'PML'],
+        'process-name': ['Imports', 'Imports', 'Imports', 'Imports'],
+        'series': ['N9103US3', 'N9103US3', 'N9103US3', 'N9103US3'],
+        'series-description': ['Total US Natural Gas Imports', 'Total US Natural Gas Imports', 'Total US Natural Gas Imports', 'Total US Natural Gas Imports'],
+        'value': [3.0, 4.2, 5.1, 6.2],
+        'units': ['$/MCF', '$/MCF', '$/MCF', '$/MCF']}
+        expected_df = pd.DataFrame(data)
+        result_df = EiaTransformation.convert_price_to_float(df=df_convert_price_to_float, column=['value'])
+        pd.testing.assert_frame_equal(result_df, expected_df)
+
     def test_natural_gas_prices_lag(self, df_eia_feature_engineering_testing):
         '''
         Tests natural_gas_prices_lag function of EiaTransformation class

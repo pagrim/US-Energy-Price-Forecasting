@@ -44,7 +44,7 @@ class EtlTransforms:
         Normalises dataframe before training machine learning model on dataframe
     '''
     @classmethod
-    def json_to_df(cls, data: json) -> pd.DataFrame:
+    def json_to_df(cls, data: json, date_as_index: bool) -> pd.DataFrame:
         '''
         Converts json data to a dataframe
 
@@ -54,8 +54,10 @@ class EtlTransforms:
         Returns:
             pd.DataFrame: Returns json data as a dataframe
         '''
-        json_data = json.loads(data)
-        df = pd.DataFrame(json_data)
+        df = pd.DataFrame(data)
+        if date_as_index is True:
+            df = df.set_index('date')
+            df.index = pd.to_datetime(df.index)
         return df
     
     @classmethod

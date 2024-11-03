@@ -150,6 +150,23 @@ def mock_metadata_response():
     return data
 
 @pytest.fixture
+def df_convert_price_to_float():
+    ''' Dataframe used for testing of convert_price_to_float function of EIATransformation class '''
+    data = {'period': ['1999-01', '1999-02', '1999-03', '1999-04'],
+        'duoarea': ['NUS-Z00', 'NUS-Z00', 'NUS-Z00', 'NUS-Z00'],
+        'area-name': ['US.', 'US.', 'US.', 'US.'],
+        'product': ['EPG0', 'EPG0', 'EPG0', 'EPG0'],
+        'product-name': ['Natural Gas', 'Natural Gas', 'Natural Gas', 'Natural Gas'],
+        'process': ['PML', 'PML', 'PML', 'PML'],
+        'process-name': ['Imports', 'Imports', 'Imports', 'Imports'],
+        'series': ['N9103US3', 'N9103US3', 'N9103US3', 'N9103US3'],
+        'series-description': ['Total US Natural Gas Imports', 'Total US Natural Gas Imports', 'Total US Natural Gas Imports', 'Total US Natural Gas Imports'],
+        'value': ['3.0', '4.2', '5.1', '6.2'],
+        'units': ['$/MCF', '$/MCF', '$/MCF', '$/MCF']}
+    df = pd.DataFrame(data)
+    return df
+
+@pytest.fixture
 def df_etl_transforms_testing():
     ''' Dataframe to be used for testing of EtlUtils class '''
     data = [{'date': '1999-01-04', 'datatype': 'AWND', 'station': 'GHCND:USW00094847', 'value': 4.3, 'city': 'Detroit', 'state': 'Michigan'},

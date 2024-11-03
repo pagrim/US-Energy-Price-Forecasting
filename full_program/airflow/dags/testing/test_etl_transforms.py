@@ -12,13 +12,21 @@ merged_df
 
 class TestEtlTransforms:
     ''' Test class for testing EtlUtils class '''
-    def test_json_to_df(self, df_etl_transforms_testing):
+    def test_json_to_df_date_as_index_false(self, df_etl_transforms_testing):
         '''
-        Tests json_to_df function of EtlUtils class
+        Tests json_to_df function of EtlUtils class with date_as_index set to False
         '''
-        json_data = df_etl_transforms_testing.to_json(orient='records')
-        result_df = EtlTransforms.json_to_df(data=json_data)
+        result_df = EtlTransforms.json_to_df(data=df_etl_transforms_testing, date_as_index=False)
         pd.testing.assert_frame_equal(result_df, df_etl_transforms_testing)
+    
+    def test_json_to_df_date_as_index_true(self, df_etl_transforms_testing):
+        '''
+        Tests json_to_df function of EtlUtils class with date_as_index set to True
+        '''
+        expected_df = df_etl_transforms_testing.set_index('date')
+        expected_df.index = pd.to_datetime(expected_df.index)
+        result_df = EtlTransforms.json_to_df(data=df_etl_transforms_testing, date_as_index=True)
+        pd.testing.assert_frame_equal(result_df, expected_df)
     
     def test_df_to_json(self, df_etl_transforms_testing):
         '''
