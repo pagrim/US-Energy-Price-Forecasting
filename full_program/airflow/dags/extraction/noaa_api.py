@@ -120,9 +120,12 @@ class NOAA:
         data = []
         
         start_date = self.s3_metadata.get_latest_end_date(folder=metadata_folder, object_key=metadata_object_key, dataset_key=metadata_dataset_key)
+        increment = timedelta(days=6)
         if start_date is None:
             start_date = start_date_if_none
         parameters['startdate'] = start_date
+        enddate = datetime.strptime(start_date, '%Y-%m-%d')
+        parameters['enddate'] = (enddate + increment).strftime('%Y-%m-%d')
 
         while True:
             response = self.api_request(parameters=parameters)
@@ -139,7 +142,6 @@ class NOAA:
             
             startdate = datetime.strptime(parameters['startdate'], '%Y-%m-%d')
             enddate = datetime.strptime(parameters['enddate'], '%Y-%m-%d')
-            increment = timedelta(days=6)
                 
             parameters['startdate'] = (startdate + increment).strftime('%Y-%m-%d')
             parameters['enddate'] = (enddate + increment).strftime('%Y-%m-%d')
