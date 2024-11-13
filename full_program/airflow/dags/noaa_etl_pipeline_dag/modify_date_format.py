@@ -15,14 +15,17 @@ def modify_date_format():
     s3 = S3(config=config)
 
     # Retrieve extracted data from S3 folder
-    daily_weather_json = s3.get_data(folder='full_program/extraction/daily_weather', object_key=f'daily_weather_{formatted_date}')
+    daily_weather_json = s3.get_data(folder='full_program/extraction/daily_weather/', object_key=f'daily_weather_{formatted_date}')
     daily_weather_df = EtlTransforms.json_to_df(data=daily_weather_json, date_as_index=False)
 
     # Convert date column to datetime and create a quarter column
     daily_weather_df = NoaaTransformation.modify_date(df=daily_weather_df)
+
+    # Convert date column to string
+    daily_weather_df['date'] = daily_weather_df['date'].dt.strftime('%Y-%m-%d')
     
     # Put data in S3
-    s3.put_data(data=daily_weather_df, folder='full_program/extraction/daily_weather', object_key=f'daily_weather_{formatted_date}')
+    s3.put_data(data=daily_weather_df, folder='full_program/extraction/daily_weather/', object_key=f'daily_weather_{formatted_date}')
 
 
 

@@ -24,7 +24,7 @@ class EiaTransformation:
         Creates total natural gas consumption to natural gas underground storage ratio
     '''
     @classmethod
-    def convert_price_to_float(cls, df: pd.DataFrame, column: str) -> pd.DataFrame:
+    def convert_column_to_float(cls, df: pd.DataFrame, column: str) -> pd.DataFrame:
         '''
         Converts price column from non-float format to floating format
 
@@ -36,6 +36,12 @@ class EiaTransformation:
             pd.DataFrame: Returns modified dataframe
         '''
         df[column] = pd.to_numeric(df[column])
+        return df
+    
+    @classmethod
+    def convert_date_format(cls, df: pd.DataFrame) -> pd.DataFrame:
+        ''' Convert YYYY-MM date format to YYYY-MM-DD for monthly variables extracted '''
+        df['date'] = pd.to_datetime(df['date'], format='%Y-%m').dt.strftime('%Y-%m-%d')
         return df
 
     @classmethod

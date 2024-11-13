@@ -1,4 +1,4 @@
-#!/mnt/c/Users/kpali/Documents/Projects/US-Energy-Price-Forecasting/venv/bin/python
+#!/mnt/c/Users/kpali/Documents/Projects/US-Energy-Price-Forecasting/venv/bin/python3
 # -*- coding: utf-8 -*-
 import re
 import sys

@@ -98,7 +98,7 @@ class NOAA:
         if not data:
             return None
         else: 
-            dates = [datetime.strptime(item['date'], '%Y-%m-%d') for item in data]
+            dates = [datetime.strptime(item['date'], '%Y-%m-%dT%H:%M:%S') for item in data]
             max_date = max(dates)
             max_date_str = max_date.strftime('%Y-%m-%d')
             return max_date_str
@@ -128,6 +128,7 @@ class NOAA:
         parameters['enddate'] = (enddate + increment).strftime('%Y-%m-%d')
 
         while True:
+            print(parameters['startdate'])
             response = self.api_request(parameters=parameters)
             results = response.json().get('results', [])
 

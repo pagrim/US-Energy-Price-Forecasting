@@ -17,7 +17,7 @@ def noaa_extraction():
     # Extract weather data from NOAA API
     parameters = {'datasetid': 'GHCND',
     'datatypeid': ['TMIN', 'TMAX','TAVG', 'SNOW', 'AWND'],
-    'stationid': ['GHCND:USW00023174', 'GHCND:USW00023188', 'GHCND:USW00023244',
+    'stationid': ['GHCND:USW00023174', 'GHCND:USW00023188',
     'GHCND:USW00023234', 'GHCND:USW00023232', 'GHCND:USW00012839',
     'GHCND:USW00012842', 'GHCND:USW00012815', 'GHCND:USW00013889',
     'GHCND:USW00094846', 'GHCND:USW00013994', 'GHCND:USW00012916',
@@ -29,7 +29,7 @@ def noaa_extraction():
     'units': 'metric',
     'limit': 1000}
 
-    noaa.extract(parameters=parameters, folder='full_program/extraction/daily_weather', 
-    object_key = f'daily_weather_{formatted_date}', metadata_folder='metadata/', 
+    noaa.extract(parameters=parameters, folder='full_program/extraction/daily_weather/', 
+    object_key = f'daily_weather_{formatted_date}', metadata_folder='full_program/metadata/', 
     metadata_object_key='metadata', metadata_dataset_key='daily_weather', 
     start_date_if_none='1999-01-04')

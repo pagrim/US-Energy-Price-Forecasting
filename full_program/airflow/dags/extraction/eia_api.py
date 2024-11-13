@@ -58,7 +58,7 @@ class EIA:
         start_date = self.s3_metadata.get_latest_end_date(folder=metadata_folder, object_key=metadata_object_key, dataset_key=metadata_dataset_key) # Varies depending on metadata for given dataset
         if start_date is None:
             start_date = start_date_if_none
-        headers['start_date'] = start_date
+        headers['start'] = start_date
         headers['offset'] = offset
         headers = {
             'X-Params': json.dumps(headers),
@@ -70,7 +70,7 @@ class EIA:
         except requests.RequestException as e:
             return 'Error occurred', e
     
-    def get_max_date(self, data: list) -> str:
+    def get_max_date(self, data: list, is_monthly: bool) -> str:
         ''' 
         Retrieves latest end date from data extracted to be logged in metadata
         Args:
@@ -81,14 +81,17 @@ class EIA:
         '''
         if not data:
             return None
-        else: 
+        elif is_monthly is False: 
             dates = [datetime.strptime(item['period'], '%Y-%m-%d') for item in data]
-            max_date = max(dates)
-            max_date_str = max_date.strftime('%Y-%m-%d')
-            return max_date_str
+        else:
+            dates = [datetime.strptime(item['period'], '%Y-%m') for item in data]
+        
+        max_date = max(dates)
+        max_date_str = max_date.strftime('%Y-%m-%d')
+        return max_date_str
         
     def extract(self, endpoint: str, headers: dict, folder: str, object_key: str, metadata_folder: str, 
-                metadata_object_key: str, metadata_dataset_key: str, start_date_if_none: str, offset=0) -> None:
+        metadata_object_key: str, metadata_dataset_key: str, start_date_if_none: str, is_monthly: bool, offset=0) -> None:
         '''
         Extracts data from a request to a specific endpoint and puts data in a S3 endpoint.
         Maybe multiple requests to a specific endpoint as the API can only return 5000 results
@@ -116,8 +119,7 @@ class EIA:
                 offset += 5000
             else:
                 break
-        
-        max_date = self.get_max_date(data)
+        max_date = self.get_max_date(data, is_monthly=is_monthly)
         if max_date is None:
             return
         else:

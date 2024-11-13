@@ -3,6 +3,7 @@ import json
 import os
 from datetime import datetime
 import boto3
+import pandas as pd
 from botocore.exceptions import ClientError
 from dotenv import load_dotenv
 from utils.config import *
@@ -87,6 +88,9 @@ class S3:
             object_key (str): Name of object being retrieved
 
         '''
+        if isinstance(data, pd.DataFrame):
+            data = data.to_dict(orient='records')
+
         data_json = json.dumps(data)
         self.connect()
         self.s3_client.put_object(Bucket=self.bucket, Key=folder + object_key, 
