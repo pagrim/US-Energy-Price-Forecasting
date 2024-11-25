@@ -1,42 +1,6 @@
 version: '3.8'
 
 services:
-  postgres_mlflow:
-    image: postgres:latest
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: mlflow_db
-    ports:
-      - "5439:5432"
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-
-  mlflow:
-    build:
-      context: .
-      dockerfile: dockerfile.mlflow
-    environment:
-      BACKEND_STORE_URI: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres_mlflow:5432/mlflow_db
-      ARTIFACT_STORE: s3://us-energy-price-forecasting/full_program/artifacts/
-      MODEL_REGISTRY_URI: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres_mlflow:5432/mlflow_db
-      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
-      AWS_REGION: ap-southeast-1
-    ports:
-      - "5001:5000"
-    depends_on:
-      - postgres_mlflow
-    command:
-      - sh    # (sh allows for var substitution of BACKEND and ARTIFACTS)
-      - -c
-      - mlflow server 
-        --port 5000
-        --host 0.0.0.0 
-        --backend-store-uri $${BACKEND_STORE_URI} 
-        --default-artifact-root $${ARTIFACT_STORE}
-        --registry-store-uri $${MODEL_REGISTRY_URI}
-  
   postgres:
     image: postgres:latest
     ports:
@@ -53,13 +17,13 @@ services:
       retries: 5
       start_period: 5s
     restart: always
-  
+
   x-airflow-common:
     &airflow-common
     # In order to add custom dependencies or upgrade provider packages you can use your extended image.
     # Comment the image line, place your Dockerfile in the directory where you placed the docker-compose.yaml
     # and uncomment the "build" line below, Then run `docker-compose build` to build the images.
-    image: apache/airflow:2.7.0
+    image: airflow_pypackage:2.7.0
     #build:
     #context: .
     #dockerfile: dockerfile.airflow
@@ -81,21 +45,20 @@ services:
       #AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: 'true'
       # WARNING: Use _PIP_ADDITIONAL_REQUIREMENTS option ONLY for a quick checks
       # for other purpose (development, test and especially production usage) build/extend Airflow image.
-      _PIP_ADDITIONAL_REQUIREMENTS: "scikit-learn tensorflow mlflow"
+      #_PIP_ADDITIONAL_REQUIREMENTS: "scikit-learn tensorflow mlflow"
     volumes:
       - ${AIRFLOW_PROJ_DIR:-.}/airflow/dags:/opt/airflow/dags
       - ${AIRFLOW_PROJ_DIR:-.}/airflow/logs:/opt/airflow/logs
       - ${AIRFLOW_PROJ_DIR:-.}/airflow/config:/opt/airflow/config
       - ${AIRFLOW_PROJ_DIR:-.}/airflow/plugins:/opt/airflow/plugins
       - ${AIRFLOW_PROJ_DIR:-.}/airflow/sequences:/opt/airflow/sequences
-      - ./.env:/opt/airflow/.env
-      
+
     user: "${AIRFLOW_UID:-50000}:0"
     depends_on:
       &airflow-common-depends-on
       postgres:
         condition: service_healthy
-  
+
   airflow-webserver:
     <<: *airflow-common
     command: webserver
@@ -112,7 +75,7 @@ services:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
-  
+
   airflow-scheduler:
     <<: *airflow-common
     command: scheduler
@@ -121,7 +84,7 @@ services:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
-  
+
   airflow-init:
     <<: *airflow-common
     entrypoint: /bin/bash
@@ -199,8 +162,7 @@ services:
     user: "0:0"
     volumes:
       - ${AIRFLOW_PROJ_DIR:-.}/airflow:/sources
-      - /.env:/sources/.env
-  
+
   airflow-cli:
     <<: *airflow-common
     profiles:
@@ -213,30 +175,6 @@ services:
       - bash
       - -c
       - airflow
-  
-  streamlit:
-    build:
-      context: .
-      dockerfile: dockerfile.streamlit
-    environment:
-      MLFLOW_TRACKING_URI: http://mlflow:5000
-      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
-      AWS_REGION: ap-southeast-1
-    ports:
-      - "8502:8501"
-    depends_on:
-      - mlflow
-    volumes:
-      - ${AIRFLOW_PROJ_DIR:-.}/streamlit:/app  # Mount the Streamlit application directory
-  
-  testing:
-    build:
-      context: .
-      dockerfile: dockerfile.testing
-    volumes:
-      - ${AIRFLOW_PROJ_DIR:-.}/airflow/dags:/opt/airflow/dags
-      - ./.env:/opt/airflow/.env
 
 volumes:
   pgdata:
