@@ -31,6 +31,12 @@ def merge_dataframes():
     merged_df = EtlTransforms.merge_dataframes(daily_weather_df=daily_weather_df, natural_gas_monthly_variables_df=natural_gas_monthly_variables_df,
     natural_gas_rigs_in_operation_df=natural_gas_rigs_in_operation_df, natural_gas_spot_prices_df=natural_gas_spot_prices_df,
     heating_oil_spot_prices_df=heating_oil_spot_prices_df)
+
+    # Reset index so date column is stored as json
+    merged_df = merged_df.reset_index()
+
+    # Convert date from timestamp to string
+    merged_df['date'] = merged_df['date'].dt.strftime('%Y-%m-%d')
     
     # Put data in S3
     s3.put_data(data=merged_df, folder='full_program/curated/training_data/', object_key=f'curated_training_data_{formatted_date}')

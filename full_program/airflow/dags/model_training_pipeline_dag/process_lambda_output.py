@@ -10,9 +10,9 @@ def process_lambda_output(*args, **kwargs):
     status_code = lambda_response.get('status_code')
     
     if status_code == 200:
-        return "next_task"  # Return the task ID of the next task to execute
+        return 'merge_dataframes'  # Return the task ID of the next task to execute
     elif status_code == 400:
-        raise AirflowException("Transformed natural gas spot prices do not exist for today. DAG will terminate.")
+        raise AirflowException('Transformed natural gas spot prices do not exist for today. DAG will terminate.')
     else:
-        print(f"Unexpected status code: {status_code}")
-        raise AirflowException("Unexpected status code from Lambda.")
+        print(f'Unexpected status code: {status_code}')
+        raise AirflowException('Unexpected status code from Lambda.')

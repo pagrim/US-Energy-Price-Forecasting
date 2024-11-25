@@ -28,6 +28,12 @@ def natural_gas_feature_engineering():
     curated_training_data_df = EiaTransformation.total_consumption_to_total_underground_storage_ratio(df=curated_training_data_df)
     curated_training_data_df = EiaTransformation.is_december_or_january(df=curated_training_data_df)
 
+    # Reset index so date column is stored as json
+    curated_training_data_df = curated_training_data_df.reset_index()
+
+    # Convert date from timestamp to string
+    curated_training_data_df['date'] = curated_training_data_df['date'].dt.strftime('%Y-%m-%d')
+
     # Put data in S3
     s3.put_data(data=curated_training_data_df, folder='full_program/curated/training_data/', object_key=f'curated_training_data_{formatted_date}')
 

@@ -1,6 +1,5 @@
 ''' Import modules '''
 from datetime import datetime
-from extraction.eia_api import *
 from utils.config import *
 from utils.aws import S3
 from transformation.etl_transforms import EtlTransforms

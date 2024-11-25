@@ -1,5 +1,6 @@
 ''' Import modules '''
 import json
+import os
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import RobustScaler
@@ -209,7 +210,7 @@ class EtlTransforms:
         Returns:
             pd.DataFrame: Returns dataframe with columns with null values end of series forward filled
         '''
-        columns_to_ffill = ['residential_consumption', 'commerical_consumption', 'total_underground_storage',
+        columns_to_ffill = ['residential_consumption', 'commercial_consumption', 'total_underground_storage',
         'imports', 'lng_imports', 'natural_gas_rigs_in_operation', 'awnd', 'snow', 'tavg']
         
         for col in columns_to_ffill:
@@ -256,7 +257,7 @@ class EtlTransforms:
         return holdout_df
 
     @classmethod
-    def create_sequences(cls, x: pd.DataFrame, y: pd.DataFrame, sequence_length: int) -> np.array:
+    def create_sequences(cls, x: pd.DataFrame, y: pd.DataFrame, sequence_length: int, output_dir: str, batch_size: int, type: str) -> np.array:
         '''
         Creates sequences for LSTM
 
@@ -268,14 +269,79 @@ class EtlTransforms:
         Returns:
             np.array: Returns array of sequences for both input and output variables
         '''
-        x_array, y_array = [], []
+
+        os.makedirs(output_dir, exist_ok=True)
+        
+        output_file_x = os.path.join(output_dir, f'x_sequences_{type}.npy')
+        output_file_y = os.path.join(output_dir, f'y_sequences_{type}.npy')
+
+        file_exists_x = os.path.exists(output_file_x)
+        file_exists_y = os.path.exists(output_file_y)
+
+        x_batch, y_batch = [], []
+
+        num_sequences_x = 0
+        num_sequences_y = 0
+
         for i in range(len(y) - sequence_length):
-            x_array.append(x.iloc[i:i + sequence_length])
-            y_array.append(y.iloc[i + sequence_length])
-        return np.array(x_array), np.array(y_array)
+            x_batch.append(x.iloc[i:i + sequence_length])
+            y_batch.append(y.iloc[i + sequence_length])
+
+            if len(x_batch) >= batch_size:
+                if file_exists_x:
+                    existing_data_x = np.load(output_file_x, allow_pickle=True)
+                    new_data_x = np.concatenate([existing_data_x, np.array(x_batch)], axis=0)
+                    np.save(output_file_x, new_data_x)
+                else:
+                    np.save(output_file_x, np.array(x_batch))
+                    file_exists_x = True
+                
+                if file_exists_y:
+                    existing_data_y = np.load(output_file_y, allow_pickle=True)
+                    new_data_y = np.concatenate([existing_data_y, np.array(y_batch)], axis=0)
+                    np.save(output_file_y, new_data_y)
+                else:
+                    np.save(output_file_y, np.array(y_batch))
+                    file_exists_y = True
+            
+            num_sequences_x += len(x_batch)
+            num_sequences_y += len(y_batch)
+            x_batch, y_batch = [], []
+
+        if len(x_batch) > 0:
+            if file_exists_x:
+                existing_data_x = np.load(output_file_x, allow_pickle=True)
+                new_data_x = np.concatenate([existing_data_x, np.array(x_batch)], axis=0)
+                np.save(output_file_x, new_data_x)
+            else:
+                np.save(output_file_x, new_data_x)
+            
+            if file_exists_y:
+                existing_data_y = np.load(output_file_y, allow_pickle=True)
+                new_data_y = np.concatenate([existing_data_y, np.array(y_batch)], axis=0)
+                np.save(output_file_y, new_data_y)
+            else:
+                np.save(output_file_y, np.array(y_batch))
+            
+            num_sequences_x += len(x_batch)
+            num_sequences_y += len(y_batch)
+        
+        print(f'Sequences have been saved to {output_file_x} and {output_file_y} and {num_sequences_x} and {num_sequences_y}')
+        print(os.path.getsize(output_file_x))
+
+        if not os.path.exists(output_file_x):
+            print(f"Error: {output_file_x} does not exist.")
+        else:
+            print(f"{output_file_x} exists.")
+
+        if not os.path.exists(output_file_y):
+            print(f"Error: {output_file_y} does not exist.")
+        else:
+            print(f"{output_file_y} exists.")
+
     
     @classmethod
-    def normalisation(cls, train_df: pd.DataFrame, test_df: pd.DataFrame) -> pd.DataFrame:
+    def normalise(cls, train_df: pd.DataFrame, test_df: pd.DataFrame) -> pd.DataFrame:
         '''
         Normalises dataframe before training machine learning model on dataframe
 
@@ -294,16 +360,60 @@ class EtlTransforms:
        '30day_rolling_average price ($/MMBTU)', '7day_rolling_median price ($/MMBTU)','14day_rolling_median price ($/MMBTU)',
        '30day_rolling_median price ($/MMBTU)', 'total_consumption_total_underground_storage_ratio',
        'min_tavg', 'max_tavg', 'max_abs_tavg_diff', 'max_abs_tavg_diff_relative_to_daily_median', 
-       'hdd_sum', 'cdd_sum', 'wci_sum']
-        log_columns = ['snow_sum']
+       'hdd_max', 'cdd_max', 'natural_gas_rigs_in_operation']
+        #log_columns = ['snow_sum']
         robust_scaler = RobustScaler()
 
+        # Normalise training data
         train_df[robust_columns] = robust_scaler.fit_transform(train_df[robust_columns])
-        test_df[robust_columns] = robust_scaler.transform(test_df[robust_columns])
         
-        train_df[log_columns] = np.log(train_df[log_columns] + 1)
-        test_df[log_columns] = np.log(test_df[log_columns] + 1)
+        #train_df[log_columns] = np.log(train_df[log_columns] + 1)
+
+        # Normalise test data
+        test_df[robust_columns] = robust_scaler.transform(test_df[robust_columns])
+
+        #test_df[log_columns] = np.log(test_df[log_columns] + 1)
+        
+        # Return normalised dataframes
         return train_df, test_df
+    
+    @classmethod
+    def normalise_test_data(cls, test_df: pd.DataFrame) -> pd.DataFrame:
+        '''
+        Normalise dataframe before training machine learning model on test data
+
+        Args:
+            test_df (pd.DataFrame): Test dataframe
+        
+        Returns:
+            pd.DataFrame: Returns test dataframe with normalised data
+        '''
+        # Columns where robust scaler is going to be applied
+        robust_columns = ['imports', 'lng_imports', 'heating_oil_natural_gas_price_ratio',  '7day_ew_volatility price ($/MMBTU)',
+       '14day_ew_volatility price ($/MMBTU)', '30day_ew_volatility price ($/MMBTU)', '60day_ew_volatility price ($/MMBTU)', 
+       'price_1day_lag ($/MMBTU)', 'price_2day_lag ($/MMBTU)', 'price_3day_lag ($/MMBTU)',
+       '7day_rolling_average price ($/MMBTU)', '14day_rolling_average price ($/MMBTU)',
+       '30day_rolling_average price ($/MMBTU)', '7day_rolling_median price ($/MMBTU)','14day_rolling_median price ($/MMBTU)',
+       '30day_rolling_median price ($/MMBTU)', 'total_consumption_total_underground_storage_ratio',
+       'min_tavg', 'max_tavg', 'max_abs_tavg_diff', 'max_abs_tavg_diff_relative_to_daily_median', 
+       'hdd_max', 'cdd_max', 'wci_sum']
+        
+        # Columns where log scaler is going to be applied
+        log_columns = ['snow_sum']
+
+        # Define robust scaler
+        robust_scaler = RobustScaler()
+
+        # Apply robust scaler
+        test_df[robust_columns] = robust_scaler.transform(test_df[robust_columns])
+
+        # Apply log scaler
+        test_df[log_columns] = np.log(test_df[log_columns] + 1)
+
+        # Return test dataframe
+        return test_df
+        
+        
         
 
 

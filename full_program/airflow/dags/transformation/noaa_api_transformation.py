@@ -159,6 +159,7 @@ class NoaaTransformation:
         hdd_aggregation_by_state = df.groupby([df.index, 'state'])['hdd'].agg(hdd_max='sum').reset_index()
         hdd_aggregation_max = hdd_aggregation_by_state.groupby('date')['hdd_max'].max()
         df = pd.merge(df, hdd_aggregation_max, left_index=True, right_index=True)
+        df = df.drop(columns=['hdd'], axis=1)
         return df
     
     @classmethod
@@ -176,6 +177,7 @@ class NoaaTransformation:
         cdd_aggregation_by_state = df.groupby([df.index, 'state'])['cdd'].agg(cdd_max='sum').reset_index()
         cdd_aggregation_max = cdd_aggregation_by_state.groupby('date')['cdd_max'].max()
         df = pd.merge(df, cdd_aggregation_max, left_index=True, right_index=True)
+        df = df.drop(columns=['cdd'], axis=1)
         return df
     
     @classmethod

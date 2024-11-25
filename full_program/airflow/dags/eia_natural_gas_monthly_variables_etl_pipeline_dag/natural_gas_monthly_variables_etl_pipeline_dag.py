@@ -8,6 +8,7 @@ from eia_natural_gas_monthly_variables_etl_pipeline_dag.drop_nulls import drop_n
 from eia_natural_gas_monthly_variables_etl_pipeline_dag.pivot_data import pivot_data
 from eia_natural_gas_monthly_variables_etl_pipeline_dag.rename_columns import rename_columns
 from eia_natural_gas_monthly_variables_etl_pipeline_dag.convert_values_to_float import convert_values_to_float
+from eia_natural_gas_monthly_variables_etl_pipeline_dag.convert_date_format import convert_date_format
 
 # Create default arguments for DAG
 default_args = {
@@ -43,4 +44,9 @@ with DAG(dag_id='natural_gas_monthly_variables_etl_pipeline', default_args=defau
         task_id='rename_columns',
         python_callable=rename_columns
     )
-    natural_gas_monthly_variables_extraction >> drop_columns >> drop_nulls >> convert_values_to_float >> pivot_data >> rename_columns
+    convert_date_format = PythonOperator(
+        task_id='convert_date_format',
+        python_callable=convert_date_format
+    )
+    natural_gas_monthly_variables_extraction >> drop_columns >> drop_nulls >> convert_values_to_float \
+    >> pivot_data >> rename_columns >> convert_date_format
