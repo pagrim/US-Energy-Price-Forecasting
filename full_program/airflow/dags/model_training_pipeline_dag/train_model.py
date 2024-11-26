@@ -40,7 +40,7 @@ def train_model():
     print('Data has been normalised')
 
     # Create sequences for training and test data
-    EtlTransforms.create_sequences(x=X_train, y=y_train, sequence_length=30, output_dir='/opt/airflow/dags/', batch_size=128, type='train_7day')
+    train_dataset = EtlTransforms.build_dataset(x=X_train, y=y_train, sequence_length=30, batch_size=128)
     '''EtlTransforms.create_sequences(x=X_train, y=y_train, sequence_length=21, output_dir='/opt/airflow/dags/', batch_size=128, type='train_14day')
     EtlTransforms.create_sequences(x=X_train, y=y_train, sequence_length=14, output_dir='/opt/airflow/dags/', batch_size=128, type='train_30day')
     EtlTransforms.create_sequences(x=X_train, y=y_train, sequence_length=14, output_dir='/opt/airflow/dags/', batch_size=128, type='train_60day')
