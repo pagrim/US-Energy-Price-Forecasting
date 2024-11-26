@@ -1,2 +1,4 @@
 .env
 __pycache__
+.idea/
+full_program/airflow/logs/
