@@ -3,7 +3,9 @@ import json
 import os
 import pandas as pd
 import numpy as np
+import tensorflow as tf
 from sklearn.preprocessing import RobustScaler
+from typing import Callable
 
 class EtlTransforms:
     '''
@@ -257,89 +259,39 @@ class EtlTransforms:
         return holdout_df
 
     @classmethod
-    def create_sequences(cls, x: pd.DataFrame, y: pd.DataFrame, sequence_length: int, output_dir: str, batch_size: int, type: str) -> np.array:
-        '''
+    def generator(cls, x: np.array, y: np.array, sequence_length: int) -> None:
+        """
         Creates sequences for LSTM
 
         Args:
             x (pd.DataFrame): Dataframe of input variables into the model
             y (pd.DataFrame): Dataframe of output variables into the model
             sequence_length (int): Number of elements in each sequence
-        
+
         Returns:
             np.array: Returns array of sequences for both input and output variables
-        '''
+        """
+        num_samples = len(x) - sequence_length
+        for i in range(num_samples):
+            x_seq = x[i:i + sequence_length]
+            y_next = y[i + sequence_length]
+            yield x_seq, y_next
 
-        os.makedirs(output_dir, exist_ok=True)
-        
-        output_file_x = os.path.join(output_dir, f'x_sequences_{type}.npy')
-        output_file_y = os.path.join(output_dir, f'y_sequences_{type}.npy')
+    @classmethod
+    def build_dataset(cls, x: np.array, y: np.array, sequence_length: int, batch_size: int) -> tf.data.Dataset:
+        """
+        Build dataset from generator
+        """
+        dataset = tf.data.Dataset.from_generator(
+            cls.generator,
+            args=(x, y, sequence_length),
+            output_signature=(
+                tf.TensorSpec(shape=(sequence_length, x.shape[1]), dtype=tf.float64),
+                tf.TensorSpec(shape=(y.shape[1],), dtype=tf.float64),
+            )
+        )
+        return dataset.batch(batch_size=batch_size).prefetch(tf.data.AUTOTUNE)
 
-        file_exists_x = os.path.exists(output_file_x)
-        file_exists_y = os.path.exists(output_file_y)
-
-        x_batch, y_batch = [], []
-
-        num_sequences_x = 0
-        num_sequences_y = 0
-
-        for i in range(len(y) - sequence_length):
-            x_batch.append(x.iloc[i:i + sequence_length])
-            y_batch.append(y.iloc[i + sequence_length])
-
-            if len(x_batch) >= batch_size:
-                if file_exists_x:
-                    existing_data_x = np.load(output_file_x, allow_pickle=True)
-                    new_data_x = np.concatenate([existing_data_x, np.array(x_batch)], axis=0)
-                    np.save(output_file_x, new_data_x)
-                else:
-                    np.save(output_file_x, np.array(x_batch))
-                    file_exists_x = True
-                
-                if file_exists_y:
-                    existing_data_y = np.load(output_file_y, allow_pickle=True)
-                    new_data_y = np.concatenate([existing_data_y, np.array(y_batch)], axis=0)
-                    np.save(output_file_y, new_data_y)
-                else:
-                    np.save(output_file_y, np.array(y_batch))
-                    file_exists_y = True
-            
-            num_sequences_x += len(x_batch)
-            num_sequences_y += len(y_batch)
-            x_batch, y_batch = [], []
-
-        if len(x_batch) > 0:
-            if file_exists_x:
-                existing_data_x = np.load(output_file_x, allow_pickle=True)
-                new_data_x = np.concatenate([existing_data_x, np.array(x_batch)], axis=0)
-                np.save(output_file_x, new_data_x)
-            else:
-                np.save(output_file_x, new_data_x)
-            
-            if file_exists_y:
-                existing_data_y = np.load(output_file_y, allow_pickle=True)
-                new_data_y = np.concatenate([existing_data_y, np.array(y_batch)], axis=0)
-                np.save(output_file_y, new_data_y)
-            else:
-                np.save(output_file_y, np.array(y_batch))
-            
-            num_sequences_x += len(x_batch)
-            num_sequences_y += len(y_batch)
-        
-        print(f'Sequences have been saved to {output_file_x} and {output_file_y} and {num_sequences_x} and {num_sequences_y}')
-        print(os.path.getsize(output_file_x))
-
-        if not os.path.exists(output_file_x):
-            print(f"Error: {output_file_x} does not exist.")
-        else:
-            print(f"{output_file_x} exists.")
-
-        if not os.path.exists(output_file_y):
-            print(f"Error: {output_file_y} does not exist.")
-        else:
-            print(f"{output_file_y} exists.")
-
-    
     @classmethod
     def normalise(cls, train_df: pd.DataFrame, test_df: pd.DataFrame) -> pd.DataFrame:
         '''
