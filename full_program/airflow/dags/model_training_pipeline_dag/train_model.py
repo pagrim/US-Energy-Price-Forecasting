@@ -41,6 +41,7 @@ def train_model():
 
     # Create sequences for training and test data
     train_dataset = EtlTransforms.build_dataset(x=X_train, y=y_train, sequence_length=30, batch_size=128)
+    validation_dataset = EtlTransforms.build_dataset(x=X_test, y=y_test, sequence_length=30, batch_size=128)
     '''EtlTransforms.create_sequences(x=X_train, y=y_train, sequence_length=21, output_dir='/opt/airflow/dags/', batch_size=128, type='train_14day')
     EtlTransforms.create_sequences(x=X_train, y=y_train, sequence_length=14, output_dir='/opt/airflow/dags/', batch_size=128, type='train_30day')
     EtlTransforms.create_sequences(x=X_train, y=y_train, sequence_length=14, output_dir='/opt/airflow/dags/', batch_size=128, type='train_60day')
@@ -51,7 +52,7 @@ def train_model():
     print('sequences successfully created')
 
     # Train GRU model
-    Model.train_model(output_dir='/opt/airflow/dags/', time_steps=30, experiment_id=experiment_id, forecast_horizon=7)
+    Model.train_model(train_dataset, validation_dataset, time_steps=30, experiment_id=experiment_id, forecast_horizon=7)
     '''Model.train_model(output_dir='/opt/airflow/dags/', time_steps=21, experiment_id=experiment_id, forecast_horizon=14)
     Model.train_model(output_dir='/opt/airflow/dags/', time_steps=14, experiment_id=experiment_id, forecast_horizon=30)
     Model.train_model(output_dir='/opt/airflow/dags/', time_steps=14, experiment_id=experiment_id, forecast_horizon=60)'''
