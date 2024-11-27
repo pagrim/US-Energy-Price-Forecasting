@@ -73,13 +73,7 @@ class Model:
         return model
 
     @classmethod
-    def _train(cls, model: keras.model, dataset: tf.data.Dataset, validation_dataset: tf.data.Dataset, callbacks=None):
+    def _train(cls, model: keras.Model, dataset: tf.data.Dataset, validation_dataset: tf.data.Dataset, callbacks=None):
         model.fit(dataset, epochs=150, validation_data=validation_dataset, verbose=2,
                   callbacks=[] if callbacks is None else callbacks)
         return model
-
-    @classmethod
-    def compute_mae(cls, model: keras.model, validation_dataset: tf.data.Dataset):
-        y_pred = model.predict(validation_dataset)
-        mae = mean_absolute_error(validation_dataset.take(-1),y_pred)
-        return mae
