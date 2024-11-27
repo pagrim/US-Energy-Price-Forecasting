@@ -55,7 +55,7 @@ class Model:
             x_batch, y_batch = next(train_gen)
             print(f"Batch shape: {x_batch.shape}, {y_batch.shape}")'''
 
-            trained = cls._train(model, dataset, validation_dataset, callbacks=[MLflowCallback])
+            trained = cls._train(model, dataset, validation_dataset, epochs=150, callbacks=[MLflowCallback])
             mae = cls.compute_mae(trained, validation_dataset)
 
             mlflow.log_metric("mae", mae)
@@ -73,7 +73,7 @@ class Model:
         return model
 
     @classmethod
-    def _train(cls, model: keras.Model, dataset: tf.data.Dataset, validation_dataset: tf.data.Dataset, callbacks=None):
-        model.fit(dataset, epochs=150, validation_data=validation_dataset, verbose=2,
+    def _train(cls, model: keras.Model, dataset: tf.data.Dataset, validation_dataset: tf.data.Dataset, epochs: int, callbacks=None):
+        model.fit(dataset, epochs=epochs, validation_data=validation_dataset, verbose=2,
                   callbacks=[] if callbacks is None else callbacks)
         return model
